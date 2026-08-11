@@ -4,15 +4,20 @@ import StatoChip from "./StatoChip";
 import { macroPasto } from "../data";
 import { TIPO_FOTO as FOTO, TIPO_ORA as ORA, TIPO_LABEL_BREVE as LABEL } from "../mealMeta";
 
+import { useCardExpanded, toggleCardExpanded } from "../store";
+import SwapAlimentoSheet from "./SwapAlimentoSheet";
+
 interface Props {
   pasto: DiarioPasto;
   onStatoChange: (id: string, stato: StatoPasto) => void;
   onPorzioneChange: (pastoId: string, titoloLogico: string, porzioneId: string) => void;
+  onSwap: (pastoId: string, titoloLogico: string, nuovaPorzione: any) => void;
 }
 
-export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Props) {
-  const [expanded, setExpanded] = useState(pasto.scelteEffettuate.length > 0);
+export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSwap }: Props) {
   const hasFood = pasto.scelteEffettuate.length > 0;
+  const expanded = useCardExpanded(pasto.id, hasFood);
+  const [swapTarget, setSwapTarget] = useState<string | null>(null);
   const isCompleted = pasto.stato === "completato";
   const kcal = Math.round(macroPasto(pasto).kcal);
 
@@ -30,15 +35,6 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Pr
         />
         {/* Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-
-        {/* Completed overlay check */}
-        {isCompleted && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full bg-[#27C882]/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">✓</span>
-            </div>
-          </div>
-        )}
 
         {/* Text + chip over photo */}
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 flex items-end justify-between">
@@ -62,7 +58,7 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Pr
         <div>
           {/* Expand toggle */}
           <button
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => toggleCardExpanded(pasto.id, expanded)}
             className="w-full flex items-center justify-between px-4 py-3 border-b border-[#F0EDE8] active:bg-[#F8F6F2] transition-colors"
           >
             <div className="flex items-center gap-2">
@@ -96,40 +92,26 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Pr
                     <p className="text-[10px] font-bold text-[#9A9187] uppercase tracking-widest mb-1.5">
                       {scelta.titoloLogico}
                     </p>
-
-                    {scelta.alternative.length === 1 ? (
-                      <div className="flex items-center justify-between px-3.5 py-3 bg-[#F8F6F2] rounded-2xl">
-                        <span className="text-sm font-semibold text-[#1C1915]">
-                          {sel?.alimento.nome}
-                        </span>
-                        <span className="text-xs text-[#9A9187] font-medium bg-white px-2.5 py-1 rounded-xl border border-black/5">
-                          {sel?.quantita}
-                          <span className="text-[10px]"> {sel?.alimento.unitaMisura}</span>
-                          {sel?.note && (
-                            <span className="text-[#27C882]"> · {sel.note}</span>
-                          )}
-                        </span>
+                    <div className="relative">
+                      <select
+                        value={scelta.porzioneSelezionataId}
+                        onChange={(e) => {
+                          if (e.target.value === "SWAP") setSwapTarget(scelta.titoloLogico);
+                          else onPorzioneChange(pasto.id, scelta.titoloLogico, e.target.value);
+                        }}
+                        className="w-full appearance-none bg-[#F8F6F2] rounded-2xl px-3.5 py-3 pr-10 text-sm font-semibold text-[#1C1915] border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer"
+                      >
+                        {scelta.alternative.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura} {p.note ? `(${p.note})` : ""}
+                          </option>
+                        ))}
+                        <option value="SWAP">⟲ Sostituisci alimento...</option>
+                      </select>
+                      <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
+                        <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
                       </div>
-                    ) : (
-                      <div className="relative">
-                        <select
-                          value={scelta.porzioneSelezionataId}
-                          onChange={(e) =>
-                            onPorzioneChange(pasto.id, scelta.titoloLogico, e.target.value)
-                          }
-                          className="w-full appearance-none bg-[#F8F6F2] rounded-2xl px-3.5 py-3 pr-10 text-sm font-semibold text-[#1C1915] border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer"
-                        >
-                          {scelta.alternative.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#27C882] flex items-center justify-center">
-                          <span className="text-white text-[10px] font-bold leading-none">⇅</span>
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -140,6 +122,15 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Pr
         <div className="px-4 py-4">
           <p className="text-sm text-[#9A9187] italic">Nessun alimento pianificato</p>
         </div>
+      )}
+      {/* Swap Sheet */}
+      {swapTarget && (
+        <SwapAlimentoSheet
+          open={!!swapTarget}
+          onClose={() => setSwapTarget(null)}
+          titoloLogico={swapTarget}
+          onSwap={(nuovo) => onSwap(pasto.id, swapTarget, nuovo)}
+        />
       )}
     </div>
   );

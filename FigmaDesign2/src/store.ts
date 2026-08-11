@@ -200,12 +200,41 @@ export function setPorzione(d: Date, pastoId: string, titoloLogico: string, porz
   }));
 }
 
+export function sostituisciAlimento(d: Date, pastoId: string, titoloLogico: string, nuovaPorzione: Omit<Porzione, "id">) {
+  const pId = `swap_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+  const porzione: Porzione = { ...nuovaPorzione, id: pId };
+  
+  mutateGiorno(d, (g) => ({
+    ...g,
+    pasti: g.pasti.map((p) =>
+      p.id !== pastoId
+        ? p
+        : {
+            ...p,
+            scelteEffettuate: p.scelteEffettuate.map((s) =>
+              s.titoloLogico === titoloLogico
+                ? {
+                    ...s,
+                    alternative: [porzione, ...s.alternative],
+                    porzioneSelezionataId: pId,
+                  }
+                : s,
+            ),
+          },
+    ),
+  }));
+}
+
+
 let extraSeq = 0;
 export function addExtraPasto(d: Date, extra: Omit<ExtraPasto, "id">) {
   mutateGiorno(d, (g) => ({ ...g, extra: [...g.extra, { ...extra, id: `e_${Date.now()}_${extraSeq++}` }] }));
 }
 export function removeExtraPasto(d: Date, id: string) {
   mutateGiorno(d, (g) => ({ ...g, extra: g.extra.filter((e) => e.id !== id) }));
+}
+export function claimStreak(d: Date) {
+  mutateGiorno(d, (g) => ({ ...g, streakClaimed: true }));
 }
 
 // ── Profile ──────────────────────────────────────────────────────────────────
@@ -284,4 +313,17 @@ export function resetTutto() {
   impostazioniStore.set(IMPOSTAZIONI_INIZIALI);
   acquaStore.set({ giorno: "", bicchieri: 0 });
   dietologoStore.set(DIETOLOGO_INIZIALE);
+  uiCardsStore.set({});
+}
+
+// ── UI UI State ──────────────────────────────────────────────────────────────
+const uiCardsStore = createStore<Record<string, boolean>>("mangiaria_ui_cards", {});
+
+export function useCardExpanded(pastoId: string, defaultExpanded: boolean): boolean {
+  const map = useStore(uiCardsStore);
+  return map[pastoId] ?? defaultExpanded;
+}
+
+export function toggleCardExpanded(pastoId: string, current: boolean) {
+  uiCardsStore.set((m) => ({ ...m, [pastoId]: !current }));
 }

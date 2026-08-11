@@ -41,22 +41,32 @@ export default function StatoChip({ stato, onChange }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const held = useRef(false);
 
+  const startY = useRef<number | null>(null);
+
   function clear() {
     if (timer.current) {
       clearTimeout(timer.current);
       timer.current = null;
     }
   }
-  function down() {
+  function down(e: React.PointerEvent) {
     held.current = false;
+    startY.current = e.clientY;
     clear();
     timer.current = setTimeout(() => {
       held.current = true;
       setMenu(true);
     }, 420);
   }
+  function move(e: React.PointerEvent) {
+    if (startY.current !== null && Math.abs(e.clientY - startY.current) > 10) {
+      held.current = true; // prevent click
+      clear();
+    }
+  }
   function up() {
     clear();
+    startY.current = null;
     if (!held.current) {
       const idx = STATI.indexOf(stato);
       onChange(STATI[(idx + 1) % STATI.length]);
@@ -67,6 +77,7 @@ export default function StatoChip({ stato, onChange }: Props) {
     <>
       <button
         onPointerDown={down}
+        onPointerMove={move}
         onPointerUp={up}
         onPointerLeave={clear}
         onPointerCancel={clear}

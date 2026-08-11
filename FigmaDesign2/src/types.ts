@@ -53,6 +53,7 @@ export interface ExtraPasto {
 export interface GiornoState {
   pasti: DiarioPasto[];
   extra: ExtraPasto[];
+  streakClaimed?: boolean;
 }
 
 export interface Macro {

@@ -61,7 +61,11 @@ export function statsGlobali(map: DiarioMap): StatsGlobali {
 export function streak(map: DiarioMap, oggi: Date): number {
   const qualifies = (d: Date) => {
     const g = giornoLoggato(map, d);
-    return g ? haAttivita(g) : false;
+    if (!g) return false;
+    if (d.toDateString() === oggi.toDateString()) {
+      return !!g.streakClaimed;
+    }
+    return g.streakClaimed !== false && haAttivita(g);
   };
   const cursor = new Date(oggi);
   if (!qualifies(cursor)) cursor.setDate(cursor.getDate() - 1);

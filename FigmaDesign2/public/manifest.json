@@ -3,6 +3,7 @@
   "short_name": "Mangiaria",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#F0EDE8",
   "theme_color": "#27C882",
   "icons": [

@@ -13,3 +13,23 @@
   --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Fraunces', Georgia, serif;
 }
+
+/* Blocco rotazione verticale per schermi mobili in landscape */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  body::before {
+    content: "Per favore, ruota il dispositivo in verticale per usare l'app.";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #F0EDE8;
+    color: #1C1915;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    padding: 2rem;
+  }
+}
