@@ -1,61 +1,19 @@
-import { useState, useEffect } from "react";
-
-interface Articolo {
-  id: string;
-  nome: string;
-  quantita: string;
-  categoria: string;
-  comprato: boolean;
-}
-
-const LISTA_INIZIALE: Articolo[] = [
-  // Carboidrati
-  { id: "s1", nome: "Riso parboiled",          quantita: "500 g",  categoria: "Carboidrati", comprato: false },
-  { id: "s2", nome: "Pasta semola integrale",   quantita: "500 g",  categoria: "Carboidrati", comprato: false },
-  { id: "s3", nome: "Cous cous",                quantita: "300 g",  categoria: "Carboidrati", comprato: true  },
-  // Proteine
-  { id: "s4", nome: "Petto di pollo",           quantita: "800 g",  categoria: "Proteine",    comprato: false },
-  { id: "s5", nome: "Petto di tacchino",        quantita: "400 g",  categoria: "Proteine",    comprato: false },
-  { id: "s6", nome: "Uova",                     quantita: "6 pz",   categoria: "Proteine",    comprato: true  },
-  // Verdure
-  { id: "s7", nome: "Zucchine",                 quantita: "500 g",  categoria: "Verdure",     comprato: false },
-  { id: "s8", nome: "Pomodori",                 quantita: "400 g",  categoria: "Verdure",     comprato: false },
-  { id: "s9", nome: "Spinaci freschi",          quantita: "200 g",  categoria: "Verdure",     comprato: false },
-  // Dispensa
-  { id: "s10", nome: "Olio EVO",               quantita: "500 ml", categoria: "Dispensa",    comprato: true  },
-  { id: "s11", nome: "Sale integrale",          quantita: "1 conf", categoria: "Dispensa",    comprato: true  },
-  { id: "s12", nome: "Limoni",                  quantita: "3 pz",   categoria: "Dispensa",    comprato: false },
-];
+import { useState } from "react";
+import { useSpesa, toggleArticolo, resetComprati } from "../store";
 
 const CATEGORIA_CFG: Record<string, { color: string; icon: string }> = {
   Carboidrati: { color: "#27C882", icon: "🌾" },
   Proteine:    { color: "#6366F1", icon: "🥩" },
   Verdure:     { color: "#22C55E", icon: "🥦" },
+  Frutta:      { color: "#EF4444", icon: "🍎" },
   Dispensa:    { color: "#F59E0B", icon: "🫙" },
+  Altro:       { color: "#9A9187", icon: "📦" },
 };
 
 export default function SpesaScreen() {
-  const [lista, setLista] = useState<Articolo[]>(() => {
-    const saved = localStorage.getItem("mangiaria_spesa");
-    if (saved) {
-      try { return JSON.parse(saved); } catch(e) {}
-    }
-    return LISTA_INIZIALE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("mangiaria_spesa", JSON.stringify(lista));
-  }, [lista]);
+  const lista = useSpesa();
   const [search, setSearch] = useState("");
   const [filtro, setFiltro] = useState<"tutti" | "da_comprare" | "comprati">("tutti");
-
-  function toggle(id: string) {
-    setLista((l) => l.map((a) => (a.id === id ? { ...a, comprato: !a.comprato } : a)));
-  }
-
-  function svuotaComprati() {
-    setLista((l) => l.map((a) => ({ ...a, comprato: false })));
-  }
 
   const filtered = lista.filter((a) => {
     const matchSearch = a.nome.toLowerCase().includes(search.toLowerCase());
@@ -69,6 +27,8 @@ export default function SpesaScreen() {
   const categorie = [...new Set(filtered.map((a) => a.categoria))];
   const daComprare = lista.filter((a) => !a.comprato).length;
   const totale = lista.length;
+  const comprati = totale - daComprare;
+  const pct = totale > 0 ? Math.round((comprati / totale) * 100) : 0;
 
   return (
     <div className="flex-1 overflow-y-auto pb-28">
@@ -83,7 +43,7 @@ export default function SpesaScreen() {
             </h1>
           </div>
           <button
-            onClick={svuotaComprati}
+            onClick={resetComprati}
             className="mt-1 text-xs font-bold text-[#9A9187] bg-white px-3 py-2 rounded-full border border-black/5 shadow-sm active:scale-95 transition-transform"
           >
             Reset
@@ -95,14 +55,14 @@ export default function SpesaScreen() {
           <div className="flex-1">
             <div className="flex justify-between text-xs mb-1.5">
               <span className="font-bold text-[#1C1915]">
-                {totale - daComprare} di {totale} articoli
+                {comprati} di {totale} articoli
               </span>
-              <span className="text-[#9A9187] font-medium">{Math.round(((totale - daComprare) / totale) * 100)}%</span>
+              <span className="text-[#9A9187] font-medium">{pct}%</span>
             </div>
             <div className="h-2 bg-[#F0EDE8] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#27C882] rounded-full transition-all duration-500"
-                style={{ width: `${((totale - daComprare) / totale) * 100}%` }}
+                style={{ width: `${pct}%` }}
               />
             </div>
           </div>
@@ -135,7 +95,7 @@ export default function SpesaScreen() {
           {([
             { key: "tutti",       label: `Tutti (${totale})` },
             { key: "da_comprare", label: `Da comprare (${daComprare})` },
-            { key: "comprati",    label: `Comprati (${totale - daComprare})` },
+            { key: "comprati",    label: `Comprati (${comprati})` },
           ] as const).map((f) => (
             <button
               key={f.key}
@@ -179,7 +139,7 @@ export default function SpesaScreen() {
                 {articoli.map((a) => (
                   <button
                     key={a.id}
-                    onClick={() => toggle(a.id)}
+                    onClick={() => toggleArticolo(a.id)}
                     className="w-full flex items-center gap-3.5 px-4 py-3.5 active:bg-[#F8F6F2] transition-colors text-left"
                   >
                     {/* Checkbox */}

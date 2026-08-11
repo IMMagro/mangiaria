@@ -1,4 +1,8 @@
+import type { Macro, Obiettivi } from "../types";
+
 interface Props {
+  consumato: Macro;
+  obiettivi: Obiettivi;
   completati: number;
   totale: number;
 }
@@ -9,7 +13,7 @@ const CIRC = 2 * Math.PI * R;
 function MacroBar({ label, value, max, color, unit }: {
   label: string; value: number; max: number; color: string; unit: string;
 }) {
-  const pct = Math.min((value / max) * 100, 100);
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   return (
     <div>
       <div className="flex justify-between items-baseline mb-1">
@@ -26,11 +30,11 @@ function MacroBar({ label, value, max, color, unit }: {
   );
 }
 
-export default function MacroRing({ completati, totale }: Props) {
-  const kcalConsumate = 1240;
-  const kcalTotali = 2000;
-  const pct = Math.round((kcalConsumate / kcalTotali) * 100);
-  const dash = (pct / 100) * CIRC;
+export default function MacroRing({ consumato, obiettivi, completati, totale }: Props) {
+  const kcalConsumate = consumato.kcal;
+  const kcalTotali = obiettivi.kcal;
+  const pct = kcalTotali > 0 ? Math.min(Math.round((kcalConsumate / kcalTotali) * 100), 999) : 0;
+  const dash = (Math.min(pct, 100) / 100) * CIRC;
 
   return (
     <div className="bg-white rounded-3xl p-5 shadow-sm border border-black/5">
@@ -42,7 +46,7 @@ export default function MacroRing({ completati, totale }: Props) {
             <circle cx="64" cy="64" r={R} fill="none" stroke="#EAE6E0" strokeWidth="11" />
             <circle
               cx="64" cy="64" r={R} fill="none"
-              stroke="#27C882" strokeWidth="11"
+              stroke={pct > 100 ? "#F59E0B" : "#27C882"} strokeWidth="11"
               strokeLinecap="round"
               strokeDasharray={`${dash} ${CIRC}`}
               style={{ transition: "stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1)" }}
@@ -51,21 +55,21 @@ export default function MacroRing({ completati, totale }: Props) {
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="font-display text-[22px] font-black text-[#1C1915] leading-none">{kcalConsumate}</span>
             <span className="text-[10px] text-[#9A9187] font-medium mt-0.5">/ {kcalTotali} kcal</span>
-            <span className="text-[11px] font-bold text-[#27C882] mt-1">{pct}%</span>
+            <span className={`text-[11px] font-bold mt-1 ${pct > 100 ? "text-[#F59E0B]" : "text-[#27C882]"}`}>{pct}%</span>
           </div>
         </div>
 
         {/* Macros */}
         <div className="flex-1 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#1C1915]">Obiettivo giornaliero</span>
+            <span className="text-xs font-bold text-[#1C1915]">Consumati oggi</span>
             <span className="text-[10px] font-semibold text-[#27C882] bg-[#27C882]/10 px-2 py-0.5 rounded-full">
               {completati}/{totale} pasti
             </span>
           </div>
-          <MacroBar label="Carboidrati" value={148} max={250} color="#27C882" unit="g" />
-          <MacroBar label="Proteine" value={82} max={150} color="#6366F1" unit="g" />
-          <MacroBar label="Grassi" value={41} max={80} color="#F59E0B" unit="g" />
+          <MacroBar label="Carboidrati" value={consumato.carbo} max={obiettivi.carbo} color="#27C882" unit="g" />
+          <MacroBar label="Proteine" value={consumato.proteine} max={obiettivi.proteine} color="#6366F1" unit="g" />
+          <MacroBar label="Grassi" value={consumato.grassi} max={obiettivi.grassi} color="#F59E0B" unit="g" />
         </div>
       </div>
     </div>

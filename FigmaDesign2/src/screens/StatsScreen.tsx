@@ -1,72 +1,75 @@
 import { useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Sector,
+  PieChart, Pie,
 } from "recharts";
+import { useGiorno, useAcquaOggi, setAcquaOggi, useProfilo, useImpostazioni, useDiarioMap } from "../store";
+import { macroConsumato, macroPianificato } from "../data";
+import { serieSettimana, serieMese, serieAnno, statsGlobali, streak } from "../stats";
 
-// ── Mock weekly data ────────────────────────────────────────────────────────
-const SETTIMANA = [
-  { giorno: "Lun", kcal: 1820, obiettivo: 2000 },
-  { giorno: "Mar", kcal: 2050, obiettivo: 2000 },
-  { giorno: "Mer", kcal: 1640, obiettivo: 2000 },
-  { giorno: "Gio", kcal: 1950, obiettivo: 2000 },
-  { giorno: "Ven", kcal: 2100, obiettivo: 2000 },
-  { giorno: "Sab", kcal: 1720, obiettivo: 2000 },
-  { giorno: "Dom", kcal: 1240, obiettivo: 2000, oggi: true },
-];
-
-const MACROS = [
-  { name: "Carboidrati", value: 148, max: 250, color: "#27C882" },
-  { name: "Proteine",    value: 82,  max: 150, color: "#6366F1" },
-  { name: "Grassi",      value: 41,  max: 80,  color: "#F59E0B" },
-];
-
-const DONUT_DATA = MACROS.map((m) => ({ name: m.name, value: m.value, color: m.color }));
-
-const KPI = [
-  { label: "Streak 🔥", value: "6", unit: "giorni" },
-  { label: "Media kcal", value: "1.789", unit: "kcal/giorno" },
-  { label: "Compliance", value: "82", unit: "%" },
-  { label: "Acqua oggi", value: "1,4", unit: "/ 2 L" },
-];
-
-// ── Custom bar tooltip ──────────────────────────────────────────────────────
-function BarTooltip({ active, payload, label }: any) {
+function BarTooltip({ active, payload, label, obiettivo }: any) {
   if (!active || !payload?.length) return null;
   const kcal = payload[0]?.value as number;
-  const over = kcal > 2000;
+  const over = kcal > obiettivo;
   return (
     <div className="bg-white rounded-2xl px-3 py-2 shadow-lg border border-black/5">
       <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest">{label}</p>
       <p className={`text-base font-black font-display ${over ? "text-[#F59E0B]" : "text-[#1C1915]"}`}>
         {kcal.toLocaleString("it-IT")} <span className="text-xs font-normal text-[#9A9187]">kcal</span>
       </p>
-      {over && <p className="text-[10px] text-[#F59E0B] font-semibold">+{kcal - 2000} sopra obiettivo</p>}
+      {over && <p className="text-[10px] text-[#F59E0B] font-semibold">+{kcal - obiettivo} sopra obiettivo</p>}
     </div>
   );
 }
 
-// ── Active donut sector ─────────────────────────────────────────────────────
-function ActiveShape(props: any) {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
-  return (
-    <g>
-      <Sector cx={cx} cy={cy} innerRadius={innerRadius - 4} outerRadius={outerRadius + 6}
-        startAngle={startAngle} endAngle={endAngle} fill={fill} />
-    </g>
-  );
-}
-
-// ── Period selector ─────────────────────────────────────────────────────────
 const PERIODS = ["Sett.", "Mese", "Anno"] as const;
 type Period = typeof PERIODS[number];
 
-// ── Screen ──────────────────────────────────────────────────────────────────
 export default function StatsScreen() {
   const [period, setPeriod] = useState<Period>("Sett.");
   const [activeDonut, setActiveDonut] = useState(0);
+  const profilo = useProfilo();
+  const impostazioni = useImpostazioni();
+  const acqua = useAcquaOggi();
+  const acquaMax = impostazioni.acquaMax;
+  const diarioMap = useDiarioMap();
+  const oggiGiorno = useGiorno(new Date());
 
-  const totalKcalWeek = SETTIMANA.reduce((s, d) => s + d.kcal, 0);
+  const obiettivoKcal = profilo.obiettivi.kcal;
+
+  // Today's macros (consumed, or planned as reference if nothing logged yet).
+  const consumato = macroConsumato(oggiGiorno);
+  const usaConsumato = consumato.kcal > 0;
+  const oggiMacro = usaConsumato ? consumato : macroPianificato(oggiGiorno);
+  const MACROS = [
+    { name: "Carboidrati", value: oggiMacro.carbo, max: profilo.obiettivi.carbo, color: "#27C882" },
+    { name: "Proteine", value: oggiMacro.proteine, max: profilo.obiettivi.proteine, color: "#6366F1" },
+    { name: "Grassi", value: oggiMacro.grassi, max: profilo.obiettivi.grassi, color: "#F59E0B" },
+  ];
+  const DONUT_DATA = MACROS.map((m) => ({ name: m.name, value: Math.max(m.value, 0), color: m.color }));
+  const donutVuoto = DONUT_DATA.every((d) => d.value === 0);
+
+  // All series computed from the real diary history (plan used as reference where nothing logged).
+  const today = new Date();
+  const dataset =
+    period === "Sett." ? serieSettimana(diarioMap, today)
+    : period === "Mese" ? serieMese(diarioMap, today)
+    : serieAnno(diarioMap, today);
+  const mediaKcal = dataset.length
+    ? Math.round(dataset.reduce((s, d) => s + d.kcal, 0) / dataset.length)
+    : 0;
+
+  const periodLabel = period === "Sett." ? "settimanali" : period === "Mese" ? "mensili (media/g per settimana)" : "annuali (media/g per mese)";
+
+  const globali = statsGlobali(diarioMap);
+  const streakVal = streak(diarioMap, today);
+
+  const KPI = [
+    { label: "Streak 🔥", value: streakVal.toString(), unit: streakVal === 1 ? "giorno" : "giorni" },
+    { label: "Media kcal", value: mediaKcal.toLocaleString("it-IT"), unit: "kcal/g" },
+    { label: "Compliance", value: globali.compliance.toString(), unit: "%" },
+    { label: "Acqua oggi", value: acqua.toString(), unit: `/ ${acquaMax} bicch.` },
+  ];
 
   return (
     <div className="flex-1 overflow-y-auto pb-28">
@@ -111,17 +114,16 @@ export default function StatsScreen() {
           ))}
         </div>
 
-        {/* Weekly kcal bar chart */}
+        {/* Kcal bar chart */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-black/5">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest">Calorie settimanali</p>
+              <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest">Calorie {periodLabel}</p>
               <p className="font-display text-2xl font-black text-[#1C1915] mt-0.5 leading-none">
-                {totalKcalWeek.toLocaleString("it-IT")}
-                <span className="text-sm font-sans font-normal text-[#9A9187] ml-1">kcal totali</span>
+                {mediaKcal.toLocaleString("it-IT")}
+                <span className="text-sm font-sans font-normal text-[#9A9187] ml-1">kcal media/g</span>
               </p>
             </div>
-            {/* Obiettivo line legend */}
             <div className="flex items-center gap-1.5 mt-1">
               <div className="w-4 h-0.5 bg-[#D0CBC3] rounded-full" style={{ borderTop: "2px dashed #D0CBC3", height: 0 }} />
               <span className="text-[10px] text-[#9A9187] font-medium">Obiettivo</span>
@@ -129,12 +131,13 @@ export default function StatsScreen() {
           </div>
 
           <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={SETTIMANA} barSize={28} margin={{ top: 8, right: 0, left: -28, bottom: 0 }}>
+            <BarChart data={dataset} barSize={period === "Anno" ? 14 : 28} margin={{ top: 8, right: 0, left: -28, bottom: 0 }}>
               <XAxis
                 dataKey="giorno"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fontWeight: 600, fill: "#9A9187", fontFamily: "Outfit" }}
+                tick={{ fontSize: period === "Anno" ? 9 : 11, fontWeight: 600, fill: "#9A9187", fontFamily: "Outfit" }}
+                interval={0}
               />
               <YAxis
                 axisLine={false}
@@ -142,12 +145,12 @@ export default function StatsScreen() {
                 tick={{ fontSize: 10, fill: "#C5BFB8", fontFamily: "Outfit" }}
                 tickCount={3}
               />
-              <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(0,0,0,0.04)", radius: 10 }} />
+              <Tooltip content={<BarTooltip obiettivo={obiettivoKcal} />} cursor={{ fill: "rgba(0,0,0,0.04)", radius: 10 }} />
               <Bar dataKey="kcal" radius={[8, 8, 4, 4]}>
-                {SETTIMANA.map((entry, i) => (
+                {dataset.map((entry: any, i) => (
                   <Cell
                     key={i}
-                    fill={entry.oggi ? "#27C882" : entry.kcal > 2000 ? "#F59E0B" : "#E8E4DE"}
+                    fill={entry.oggi ? "#27C882" : entry.kcal > obiettivoKcal ? "#F59E0B" : "#E8E4DE"}
                   />
                 ))}
               </Bar>
@@ -174,30 +177,36 @@ export default function StatsScreen() {
         {/* Macros donut + breakdown */}
         <div className="bg-white rounded-3xl p-5 shadow-sm border border-black/5">
           <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest mb-4">
-            Macronutrienti — oggi
+            Macronutrienti — oggi {usaConsumato ? "(consumati)" : "(da piano)"}
           </p>
 
           <div className="flex items-center gap-4">
             {/* Donut */}
             <div className="relative w-[140px] h-[140px] flex-shrink-0">
-              <PieChart width={140} height={140}>
-                <Pie
-                  data={DONUT_DATA}
-                  cx={65} cy={65}
-                  innerRadius={42} outerRadius={58}
-                  dataKey="value"
-                  strokeWidth={2}
-                  stroke="#fff"
-                  activeIndex={activeDonut}
-                  activeShape={<ActiveShape />}
-                  onMouseEnter={(_, i) => setActiveDonut(i)}
-                >
-                  {DONUT_DATA.map((d, i) => (
-                    <Cell key={i} fill={d.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-              {/* Center label */}
+              {donutVuoto ? (
+                <div className="w-full h-full rounded-full border-[16px] border-[#F0EDE8]" />
+              ) : (
+                <PieChart width={140} height={140}>
+                  <Pie
+                    data={DONUT_DATA}
+                    cx={65} cy={65}
+                    innerRadius={42} outerRadius={58}
+                    dataKey="value"
+                    strokeWidth={2}
+                    stroke="#fff"
+                    onMouseEnter={(_: unknown, i: number) => setActiveDonut(i)}
+                    onClick={(_: unknown, i: number) => setActiveDonut(i)}
+                  >
+                    {DONUT_DATA.map((d, i) => (
+                      <Cell
+                        key={i}
+                        fill={d.color}
+                        opacity={i === activeDonut ? 1 : 0.55}
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              )}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="font-display text-sm font-black text-[#1C1915] leading-none">
                   {MACROS[activeDonut].value}g
@@ -211,7 +220,7 @@ export default function StatsScreen() {
             {/* Bars breakdown */}
             <div className="flex-1 space-y-3.5">
               {MACROS.map((m, i) => {
-                const pct = Math.round((m.value / m.max) * 100);
+                const pct = m.max > 0 ? Math.round((m.value / m.max) * 100) : 0;
                 return (
                   <button
                     key={m.name}
@@ -230,7 +239,7 @@ export default function StatsScreen() {
                     <div className="h-2 bg-[#F0EDE8] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
-                        style={{ width: `${pct}%`, background: m.color }}
+                        style={{ width: `${Math.min(pct, 100)}%`, background: m.color }}
                       />
                     </div>
                   </button>
@@ -240,27 +249,32 @@ export default function StatsScreen() {
           </div>
         </div>
 
-        {/* Water tracker */}
+        {/* Water tracker — tap glasses to update (resets each day) */}
         <div className="bg-white rounded-3xl px-5 py-4 shadow-sm border border-black/5 mb-2">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest">Acqua</p>
+            <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest">Acqua · oggi</p>
             <p className="font-display text-xl font-black text-[#1C1915]">
-              1,4 <span className="text-sm font-sans font-normal text-[#9A9187]">/ 2 L</span>
+              {(acqua * 0.25).toLocaleString("it-IT")} <span className="text-sm font-sans font-normal text-[#9A9187]">/ {(acquaMax * 0.25).toLocaleString("it-IT")} L</span>
             </p>
           </div>
-          {/* 8 bicchieri */}
-          <div className="flex gap-2">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex-1 h-8 rounded-xl transition-all"
-                style={{
-                  background: i < 7 ? (i < 5 ? "#27C882" : "#A7EDD0") : "#F0EDE8",
-                }}
-              />
-            ))}
+          <div className="flex gap-1.5 flex-wrap">
+            {Array.from({ length: acquaMax }).map((_, i) => {
+              const filled = i < acqua;
+              const soglia = acquaMax * 0.65;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setAcquaOggi(acqua === i + 1 ? i : i + 1)}
+                  aria-label={`${i + 1} bicchieri`}
+                  className="h-8 rounded-xl transition-all active:scale-90"
+                  style={{ flex: "1 1 24px", minWidth: 18, background: filled ? (i < soglia ? "#27C882" : "#A7EDD0") : "#F0EDE8" }}
+                />
+              );
+            })}
           </div>
-          <p className="text-[10px] text-[#9A9187] font-medium mt-2">7 / 8 bicchieri</p>
+          <p className="text-[10px] text-[#9A9187] font-medium mt-2">
+            {acqua} / {acquaMax} bicchieri (0,25 L l'uno) · tocca per aggiornare · obiettivo modificabile in Impostazioni
+          </p>
         </div>
 
       </div>

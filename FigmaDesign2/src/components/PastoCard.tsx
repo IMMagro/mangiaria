@@ -1,30 +1,8 @@
 import { useState } from "react";
 import type { DiarioPasto, StatoPasto } from "../types";
 import StatoChip from "./StatoChip";
-
-const FOTO: Record<string, string> = {
-  colazione: "https://images.unsplash.com/photo-1610450624105-58a2f25f7911?w=600&h=400&fit=crop&auto=format",
-  spuntinoMattina: "https://images.unsplash.com/photo-1557568951-a691f75c810f?w=600&h=400&fit=crop&auto=format",
-  pranzo: "https://images.unsplash.com/photo-1573225342350-16731dd9bf3d?w=600&h=400&fit=crop&auto=format",
-  spuntinoPomeriggio: "https://images.unsplash.com/photo-1557568951-a691f75c810f?w=600&h=400&fit=crop&auto=format",
-  cena: "https://images.unsplash.com/photo-1579619002916-88cd4c81a70c?w=600&h=400&fit=crop&auto=format",
-};
-
-const ORA: Record<string, string> = {
-  colazione: "07:30",
-  spuntinoMattina: "10:30",
-  pranzo: "13:00",
-  spuntinoPomeriggio: "16:30",
-  cena: "20:00",
-};
-
-const LABEL: Record<string, string> = {
-  colazione: "Colazione",
-  spuntinoMattina: "Spuntino",
-  pranzo: "Pranzo",
-  spuntinoPomeriggio: "Spuntino",
-  cena: "Cena",
-};
+import { macroPasto } from "../data";
+import { TIPO_FOTO as FOTO, TIPO_ORA as ORA, TIPO_LABEL_BREVE as LABEL } from "../mealMeta";
 
 interface Props {
   pasto: DiarioPasto;
@@ -36,6 +14,7 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Pr
   const [expanded, setExpanded] = useState(pasto.scelteEffettuate.length > 0);
   const hasFood = pasto.scelteEffettuate.length > 0;
   const isCompleted = pasto.stato === "completato";
+  const kcal = Math.round(macroPasto(pasto).kcal);
 
   return (
     <div
@@ -89,6 +68,9 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange }: Pr
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-[#1C1915]">
                 {pasto.scelteEffettuate.length} componenti
+              </span>
+              <span className="text-[10px] font-bold text-[#9A9187] bg-[#F0EDE8] px-2 py-0.5 rounded-full">
+                {kcal} kcal
               </span>
               {pasto.scelteEffettuate.some((s) => s.alternative.length > 1) && (
                 <span className="text-[10px] font-semibold text-[#27C882] bg-[#27C882]/10 px-2 py-0.5 rounded-full">

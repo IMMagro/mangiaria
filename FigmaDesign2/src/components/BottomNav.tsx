@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 export type Tab = "home" | "stats" | "piano" | "profilo";
 
@@ -27,9 +27,35 @@ function NavItem({ icon, label, active = false, onClick }: NavItemProps) {
 interface Props {
   activeTab: Tab;
   onChange: (tab: Tab) => void;
+  onFabTap: () => void;
+  onFabHold: () => void;
 }
 
-export default function BottomNav({ activeTab, onChange }: Props) {
+export default function BottomNav({ activeTab, onChange, onFabTap, onFabHold }: Props) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const held = useRef(false);
+
+  function clear() {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }
+
+  function down() {
+    held.current = false;
+    clear();
+    timer.current = setTimeout(() => {
+      held.current = true;
+      onFabHold();
+    }, 450);
+  }
+
+  function up() {
+    clear();
+    if (!held.current) onFabTap();
+  }
+
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-20">
       <div className="bg-white/85 backdrop-blur-2xl border-t border-black/5 px-6 pb-6 pt-3">
@@ -54,10 +80,16 @@ export default function BottomNav({ activeTab, onChange }: Props) {
               </svg>
             }
           />
-          {/* FAB */}
+          {/* FAB — tap = azione predefinita, tieni premuto = menu */}
           <div className="-mt-7">
             <button
-              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl active:scale-95 transition-all"
+              onPointerDown={down}
+              onPointerUp={up}
+              onPointerLeave={clear}
+              onPointerCancel={clear}
+              onContextMenu={(e) => e.preventDefault()}
+              aria-label="Aggiungi"
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl active:scale-95 transition-all touch-none select-none"
               style={{
                 background: "linear-gradient(135deg, #27C882 0%, #1AA86A 100%)",
                 boxShadow: "0 8px 24px rgba(39, 200, 130, 0.4)",
