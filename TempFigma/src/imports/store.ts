@@ -260,12 +260,7 @@ export function setObiettivi(o: Profilo["obiettivi"]) {
 }
 
 // ── Settings ─────────────────────────────────────────────────────────────────
-const IMPOSTAZIONI_INIZIALI: Impostazioni = {
-  fabDefault: "spesa",
-  notifiche: true,
-  acquaMax: 8,
-  onboardingCompleto: false,
-};
+const IMPOSTAZIONI_INIZIALI: Impostazioni = { fabDefault: "spesa", notifiche: true, acquaMax: 8 };
 const impostazioniStore = createStore<Impostazioni>("mangiaria_impostazioni", IMPOSTAZIONI_INIZIALI);
 
 export function useImpostazioni() {

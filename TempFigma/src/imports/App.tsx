@@ -27,7 +27,6 @@ import {
 import { pianificaVisita } from "./notifications";
 import type { StatoPasto } from "./types";
 import confetti from "canvas-confetti";
-import Onboarding from "./components/Onboarding";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -48,15 +47,7 @@ function isSameDay(a: Date, b: Date) {
   );
 }
 
-export default function AppRoot() {
-  const impostazioni = useImpostazioni();
-  if (!impostazioni.onboardingCompleto) {
-    return <Onboarding onComplete={() => {}} />;
-  }
-  return <App />;
-}
-
-function App() {
+export default function App() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState<Tab>("home");

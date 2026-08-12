@@ -95,6 +95,8 @@ export interface Impostazioni {
 export interface Dietologo {
   nome: string;
   luogo?: string;
+  telefono?: string;
+  email?: string;
   prossimaVisita: string | null; // ISO datetime, es. "2026-08-20T15:30"
   note?: string;
 }

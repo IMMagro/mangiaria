@@ -89,7 +89,6 @@ export interface Impostazioni {
   fabDefault: "spesa" | "pasto";
   notifiche: boolean;
   acquaMax: number; // bicchieri al giorno (max)
-  onboardingCompleto?: boolean;
 }
 
 export interface Dietologo {

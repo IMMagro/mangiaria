@@ -7,6 +7,7 @@ import FabMenu from "./components/FabMenu";
 import AddSpesaSheet from "./components/AddSpesaSheet";
 import AddPastoSheet from "./components/AddPastoSheet";
 import ToastHost from "./components/Toast";
+import Onboarding from "./components/Onboarding";
 import StatsScreen from "./screens/StatsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import SpesaScreen from "./screens/SpesaScreen";
@@ -27,7 +28,6 @@ import {
 import { pianificaVisita } from "./notifications";
 import type { StatoPasto } from "./types";
 import confetti from "canvas-confetti";
-import Onboarding from "./components/Onboarding";
 
 function getGreeting() {
   const h = new Date().getHours();

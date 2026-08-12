@@ -5,6 +5,7 @@ import type {
   ExtraPasto,
   GiornoState,
   Impostazioni,
+  Porzione,
   Profilo,
   StatoPasto,
 } from "./types";
@@ -25,7 +26,13 @@ function createStore<T>(key: string, initial: T): Store<T> {
   let state: T = initial;
   try {
     const saved = localStorage.getItem(key);
-    if (saved != null) state = JSON.parse(saved) as T;
+    if (saved != null) {
+      const parsed = JSON.parse(saved) as T;
+      // Merge with initial so newly added fields get their defaults
+      state = (typeof initial === "object" && initial !== null && !Array.isArray(initial))
+        ? { ...initial, ...(parsed as object) } as T
+        : parsed;
+    }
   } catch {
     /* corrupted value → fall back to initial */
   }
@@ -249,8 +256,13 @@ const PROFILO_INIZIALE: Profilo = {
 
 const profiloStore = createStore<Profilo>("mangiaria_profilo", PROFILO_INIZIALE);
 
-export function useProfilo() {
-  return useStore(profiloStore);
+export function useProfilo(): Profilo {
+  const p = useStore(profiloStore);
+  return {
+    ...PROFILO_INIZIALE,
+    ...p,
+    obiettivi: p.obiettivi ?? PROFILO_INIZIALE.obiettivi,
+  };
 }
 export function setProfilo(p: Partial<Profilo>) {
   profiloStore.set((prev) => ({ ...prev, ...p }));
@@ -260,12 +272,7 @@ export function setObiettivi(o: Profilo["obiettivi"]) {
 }
 
 // ── Settings ─────────────────────────────────────────────────────────────────
-const IMPOSTAZIONI_INIZIALI: Impostazioni = {
-  fabDefault: "spesa",
-  notifiche: true,
-  acquaMax: 8,
-  onboardingCompleto: false,
-};
+const IMPOSTAZIONI_INIZIALI: Impostazioni = { fabDefault: "spesa", notifiche: true, acquaMax: 8 };
 const impostazioniStore = createStore<Impostazioni>("mangiaria_impostazioni", IMPOSTAZIONI_INIZIALI);
 
 export function useImpostazioni() {
