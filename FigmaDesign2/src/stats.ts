@@ -4,6 +4,7 @@ import {
   dateKey,
   macroConsumato,
   macroPianificato,
+  macroPasto,
   weekDates,
   weekdayIndex,
 } from "./data";
@@ -81,6 +82,37 @@ export interface Barra {
   giorno: string;
   kcal: number;
   oggi?: boolean;
+}
+
+/** Meals for the current day. */
+export function serieOggi(map: DiarioMap, oggi: Date): Barra[] {
+  const g = map[dateKey(oggi)] ?? baseGiorno(oggi);
+  const bars: Barra[] = [];
+  const labels: Record<string, string> = {
+    colazione: "Colaz.",
+    spuntinoMattina: "Sp. M.",
+    pranzo: "Pranzo",
+    spuntinoPomeriggio: "Sp. P.",
+    cena: "Cena"
+  };
+
+  g.pasti.forEach(p => {
+    bars.push({
+      giorno: labels[p.tipo] || p.tipo,
+      kcal: p.stato === "saltato" ? 0 : macroPasto(p).kcal,
+      oggi: p.stato === "completato"
+    });
+  });
+
+  const extraKcal = g.extra.reduce((acc, e) => acc + e.kcal, 0);
+  if (extraKcal > 0) {
+    bars.push({
+      giorno: "Extra",
+      kcal: extraKcal,
+      oggi: true
+    });
+  }
+  return bars;
 }
 
 /** 7 bars, Mon→Sun of the current week. */

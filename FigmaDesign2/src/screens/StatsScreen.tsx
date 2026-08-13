@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { useGiorno, useAcquaOggi, setAcquaOggi, useProfilo, useImpostazioni, useDiarioMap } from "../store";
 import { macroConsumato, macroPianificato } from "../data";
-import { serieSettimana, serieMese, serieAnno, statsGlobali, streak } from "../stats";
+import { serieOggi, serieSettimana, serieMese, serieAnno, statsGlobali, streak } from "../stats";
 
 function BarTooltip({ active, payload, label, obiettivo }: any) {
   if (!active || !payload?.length) return null;
@@ -22,12 +22,13 @@ function BarTooltip({ active, payload, label, obiettivo }: any) {
   );
 }
 
-const PERIODS = ["Sett.", "Mese", "Anno"] as const;
+const PERIODS = ["Oggi", "Sett.", "Mese", "Anno"] as const;
 type Period = typeof PERIODS[number];
 
 export default function StatsScreen() {
-  const [period, setPeriod] = useState<Period>("Sett.");
+  const [period, setPeriod] = useState<Period>("Oggi");
   const [activeDonut, setActiveDonut] = useState(0);
+  const [infoPopup, setInfoPopup] = useState<{title: string, desc: string} | null>(null);
   const profilo = useProfilo();
   const impostazioni = useImpostazioni();
   const acqua = useAcquaOggi();
@@ -52,23 +53,24 @@ export default function StatsScreen() {
   // All series computed from the real diary history (plan used as reference where nothing logged).
   const today = new Date();
   const dataset =
-    period === "Sett." ? serieSettimana(diarioMap, today)
+    period === "Oggi" ? serieOggi(diarioMap, today)
+    : period === "Sett." ? serieSettimana(diarioMap, today)
     : period === "Mese" ? serieMese(diarioMap, today)
     : serieAnno(diarioMap, today);
   const mediaKcal = dataset.length
     ? Math.round(dataset.reduce((s, d) => s + d.kcal, 0) / dataset.length)
     : 0;
 
-  const periodLabel = period === "Sett." ? "settimanali" : period === "Mese" ? "mensili (media/g per settimana)" : "annuali (media/g per mese)";
+  const periodLabel = period === "Oggi" ? "di oggi" : period === "Sett." ? "settimanali" : period === "Mese" ? "mensili (media/g per settimana)" : "annuali (media/g per mese)";
 
   const globali = statsGlobali(diarioMap);
   const streakVal = streak(diarioMap, today);
 
   const KPI = [
-    { label: "Streak 🔥", value: streakVal.toString(), unit: streakVal === 1 ? "giorno" : "giorni" },
-    { label: "Media kcal", value: mediaKcal.toLocaleString("it-IT"), unit: "kcal/g" },
-    { label: "Compliance", value: globali.compliance.toString(), unit: "%" },
-    { label: "Acqua oggi", value: acqua.toString(), unit: `/ ${acquaMax} bicch.` },
+    { label: "Streak 🔥", value: streakVal.toString(), unit: streakVal === 1 ? "giorno" : "giorni", desc: "Giorni consecutivi in cui hai registrato almeno un pasto." },
+    { label: "Media kcal", value: mediaKcal.toLocaleString("it-IT"), unit: "kcal/g", desc: "Media delle calorie assunte al giorno nel periodo selezionato." },
+    { label: "Compliance", value: globali.compliance.toString(), unit: "%", desc: "Percentuale di giorni in cui hai rispettato il piano alimentare." },
+    { label: "Acqua oggi", value: acqua.toString(), unit: `/ ${acquaMax} bicch.`, desc: "Bicchieri d'acqua bevuti oggi rispetto all'obiettivo." },
   ];
 
   return (
@@ -105,7 +107,9 @@ export default function StatsScreen() {
         <div className="grid grid-cols-2 gap-3">
           {KPI.map((k) => (
             <div key={k.label} className="bg-white rounded-3xl px-4 py-4 shadow-sm border border-black/5">
-              <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest mb-1">{k.label}</p>
+              <button onClick={() => setInfoPopup({title: k.label, desc: k.desc})} className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest mb-1 text-left active:scale-95 transition-transform flex items-center gap-1 w-full">
+                {k.label} <span className="text-[13px] opacity-70">ℹ️</span>
+              </button>
               <div className="flex items-baseline gap-1">
                 <span className="font-display text-3xl font-black text-[#1C1915] leading-none">{k.value}</span>
                 <span className="text-xs text-[#9A9187] font-medium">{k.unit}</span>
@@ -150,7 +154,13 @@ export default function StatsScreen() {
                 {dataset.map((entry: any, i) => (
                   <Cell
                     key={i}
-                    fill={entry.oggi ? "#27C882" : entry.kcal > obiettivoKcal ? "#F59E0B" : "#E8E4DE"}
+                    fill={
+                      period === "Oggi" ? (entry.oggi ? "#27C882" : "#E8E4DE")
+                      : entry.oggi ? "#27C882"
+                      : entry.kcal > obiettivoKcal ? "#F59E0B"
+                      : (entry.kcal > 0 && entry.kcal < obiettivoKcal * 0.95) ? "#3B82F6"
+                      : "#E8E4DE"
+                    }
                   />
                 ))}
               </Bar>
@@ -158,19 +168,27 @@ export default function StatsScreen() {
           </ResponsiveContainer>
 
           {/* Legend */}
-          <div className="flex gap-4 mt-2">
+          <div className="flex gap-4 mt-2 flex-wrap">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-[#E8E4DE]" />
               <span className="text-[10px] text-[#9A9187] font-medium">Nei limiti</span>
             </div>
+            {period !== "Oggi" && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-[#3B82F6]" />
+                <span className="text-[10px] text-[#9A9187] font-medium">Sotto</span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-[#27C882]" />
-              <span className="text-[10px] text-[#9A9187] font-medium">Oggi</span>
+              <span className="text-[10px] text-[#9A9187] font-medium">{period === "Oggi" ? "Completato" : "Oggi"}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-[#F59E0B]" />
-              <span className="text-[10px] text-[#9A9187] font-medium">Sforato</span>
-            </div>
+            {period !== "Oggi" && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-[#F59E0B]" />
+                <span className="text-[10px] text-[#9A9187] font-medium">Sforato</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -278,6 +296,19 @@ export default function StatsScreen() {
         </div>
 
       </div>
+
+      {/* Info Popup */}
+      {infoPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/20 backdrop-blur-sm" onClick={() => setInfoPopup(null)}>
+          <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <h3 className="font-display font-black text-xl text-[#1C1915] mb-2">{infoPopup.title}</h3>
+            <p className="text-sm text-[#6b645b] leading-relaxed mb-6">{infoPopup.desc}</p>
+            <button onClick={() => setInfoPopup(null)} className="w-full py-3.5 bg-[#F0EDE8] rounded-2xl text-sm font-bold text-[#1C1915] active:scale-95 transition-transform">
+              Ho capito
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
