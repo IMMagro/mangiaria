@@ -20,3 +20,4 @@ This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin con
 - **CRITICAL RULE**: Every time the user accepts or confirms a code modification, you MUST automatically commit and push the changes to Git (Continuous Auto-Push Mode).
 - **skill-integrator**: Whenever a new skill is created or installed, you must invoke the skill-integrator skill to analyze and register its automations in AGENTS.md.
 - **theme-factory**: Whenever you create or modify UI components, consider invoking the theme-factory skill to ensure color palette and typography consistency.
+- **design-orchestrator**: Whenever the user asks for a high-level UI modification, aesthetic improvement, or page design without specifying tools, invoke the design-orchestrator skill to automatically chain and execute the necessary design skills (frontend-design, theme-factory, icon-generation, etc.).
