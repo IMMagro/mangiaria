@@ -671,10 +671,10 @@ function RedoOnboardingSheet({ open, onClose }: { open: boolean; onClose: () => 
     <Sheet open={open} onClose={onClose} title="Rifai il questionario">
       <div className="space-y-3">
         <p className="text-sm text-[#6b645b] leading-relaxed">
-          Vuoi rifare il questionario? Il tuo piano alimentare attuale verr� resettato e ricalcolato in base ai nuovi dati.
+          Vuoi rifare il questionario? Il tuo piano alimentare attuale verrà resettato e ricalcolato in base ai nuovi dati.
         </p>
         <button onClick={doRedo} className="w-full py-3.5 rounded-2xl text-sm font-bold text-white bg-red-500 shadow-lg active:scale-[0.98] transition-all">
-          S�, rifai il questionario
+          Sì, rifai il questionario
         </button>
         <button onClick={onClose} className="w-full py-3 rounded-2xl text-sm font-bold text-[#9A9187] bg-[#F0EDE8]">Annulla</button>
       </div>
