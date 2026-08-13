@@ -196,6 +196,15 @@ export default function ProfileScreen() {
       <div className="mx-5 mt-4 space-y-3">
         <div className="bg-white rounded-3xl shadow-sm border border-black/5 overflow-hidden divide-y divide-[#F8F6F2]">
           <MenuRow
+            label="Rifai il questionario" sublabel="Ricalcola i tuoi obiettivi iniziali"
+            onClick={() => {
+              if (confirm("Vuoi rifare il questionario? Il tuo piano attuale verrà resettato per ricalcolarne uno nuovo.")) {
+                setImpostazioni({ onboardingCompleto: false });
+              }
+            }}
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>}
+          />
+          <MenuRow
             label="Il mio piano alimentare" sublabel="Modifica pasti e alternative" badge="Modifica"
             onClick={() => setPianoOpen(true)}
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8.42-15.03-8.42-15.03 0h15.03zM1 17h15v2H1z" /></svg>}
