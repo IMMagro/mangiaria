@@ -61,6 +61,11 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState<Tab>("home");
 
+  // Scroll to top when tab changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+
   const [fabMenu, setFabMenu] = useState(false);
   const [spesaSheet, setSpesaSheet] = useState(false);
   const [pastoSheet, setPastoSheet] = useState(false);
