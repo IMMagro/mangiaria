@@ -128,20 +128,51 @@ BG_REMOVAL_METHODS = {
 }
 
 
-def get_background_remove_module():
-    """Import the background_remove module from the background-remove skill."""
-    # Find the background-remove skill relative to this script
-    skill_root = Path(__file__).resolve().parent.parent.parent
-    bg_remove_path = skill_root / "background-remove" / "scripts"
+def remove_background(input_path: str, output_path: str, method: str = "builtin") -> dict:
+    """Remove background from an image using the specified method."""
+    try:
+        from PIL import Image
+        
+        if method == "rembg":
+            try:
+                import rembg
+                with open(input_path, 'rb') as i:
+                    with open(output_path, 'wb') as o:
+                        input_data = i.read()
+                        output_data = rembg.remove(input_data)
+                        o.write(output_data)
+                return {"success": True, "method": "rembg"}
+            except ImportError:
+                return {"error": "rembg is not installed. Run 'pip install rembg' or use builtin method."}
+        
+        elif method == "builtin":
+            img = Image.open(input_path).convert("RGBA")
+            datas = img.getdata()
+            
+            new_data = []
+            for item in datas:
+                # Change all white (also shades of whites) to transparent
+                if item[0] > 240 and item[1] > 240 and item[2] > 240:
+                    new_data.append((255, 255, 255, 0))
+                else:
+                    new_data.append(item)
+                    
+            img.putdata(new_data)
+            img.save(output_path, "PNG")
+            return {"success": True, "method": "builtin"}
+            
+        else:
+            # "none" or unknown
+            import shutil
+            shutil.copy2(input_path, output_path)
+            return {"success": True, "method": method}
+            
+    except Exception as e:
+        return {"error": str(e)}
 
-    if bg_remove_path.exists():
-        import sys
-        if str(bg_remove_path) not in sys.path:
-            sys.path.insert(0, str(bg_remove_path))
-        from background_remove import remove_background
-        return remove_background
-    else:
-        return None
+def get_background_remove_module():
+    """Returns the local remove_background function."""
+    return remove_background
 
 
 def build_icon_prompt(concept: str, style: str, colors: str = None, has_reference: bool = False) -> str:
