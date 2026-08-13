@@ -42,7 +42,8 @@ type SheetId =
   | "notifiche"
   | "impostazioni"
   | "aiuto"
-  | "logout";
+  | "logout"
+  | "redo";
 
 function ChevronRight() {
   return (
@@ -197,11 +198,7 @@ export default function ProfileScreen() {
         <div className="bg-white rounded-3xl shadow-sm border border-black/5 overflow-hidden divide-y divide-[#F8F6F2]">
           <MenuRow
             label="Rifai il questionario" sublabel="Ricalcola i tuoi obiettivi iniziali"
-            onClick={() => {
-              if (confirm("Vuoi rifare il questionario? Il tuo piano attuale verrà resettato per ricalcolarne uno nuovo.")) {
-                setImpostazioni({ onboardingCompleto: false });
-              }
-            }}
+            onClick={() => setSheet("redo")}
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>}
           />
           <MenuRow
@@ -263,6 +260,7 @@ export default function ProfileScreen() {
       <InfoSheet open={sheet === "aiuto"} onClose={close} title="Aiuto & Supporto" emoji="💬"
         body="Tocca un pasto in Home per personalizzarlo; tieni premuto lo stato per cambiarlo al volo. Il tasto + in basso aggiunge alla spesa (tienilo premuto per scegliere). In 'Il mio piano alimentare' modifichi pasti e alternative per ogni giorno. Tutti i dati restano su questo dispositivo. Assistenza: supporto@mangiaria.app." />
       <LogoutSheet open={sheet === "logout"} onClose={close} />
+      <RedoOnboardingSheet open={sheet === "redo"} onClose={close} />
 
       <PianoEditor open={pianoOpen} onClose={() => setPianoOpen(false)} />
     </div>
@@ -656,6 +654,27 @@ function LogoutSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
         </p>
         <button onClick={doLogout} className="w-full py-3.5 rounded-2xl text-sm font-bold text-white bg-red-500 shadow-lg active:scale-[0.98] transition-all">
           Esci e azzera i dati
+        </button>
+        <button onClick={onClose} className="w-full py-3 rounded-2xl text-sm font-bold text-[#9A9187] bg-[#F0EDE8]">Annulla</button>
+      </div>
+    </Sheet>
+  );
+}
+
+function RedoOnboardingSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  function doRedo() {
+    onClose();
+    setImpostazioni({ onboardingCompleto: false });
+  }
+
+  return (
+    <Sheet open={open} onClose={onClose} title="Rifai il questionario">
+      <div className="space-y-3">
+        <p className="text-sm text-[#6b645b] leading-relaxed">
+          Vuoi rifare il questionario? Il tuo piano alimentare attuale verr� resettato e ricalcolato in base ai nuovi dati.
+        </p>
+        <button onClick={doRedo} className="w-full py-3.5 rounded-2xl text-sm font-bold text-white bg-red-500 shadow-lg active:scale-[0.98] transition-all">
+          S�, rifai il questionario
         </button>
         <button onClick={onClose} className="w-full py-3 rounded-2xl text-sm font-bold text-[#9A9187] bg-[#F0EDE8]">Annulla</button>
       </div>
