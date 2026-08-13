@@ -509,7 +509,9 @@ function Stepper({ value, onChange, min, max, unit, accent }: {
     if (raw === "" || raw === "-") { onChange(""); return; }
     const num = parseInt(raw);
     if (isNaN(num)) return;
-    onChange(String(Math.min(max, Math.max(min, num))));
+    // Allow typing numbers below min, but cap at max.
+    // The canProceed function will block submission if it's below min.
+    onChange(String(Math.min(max, num)));
   }
   return (
     <div className="flex items-center justify-center gap-3 mt-2">
