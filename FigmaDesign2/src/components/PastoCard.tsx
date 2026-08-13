@@ -92,41 +92,42 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                     <p className="text-[10px] font-bold text-[#9A9187] uppercase tracking-widest mb-1.5">
                       {scelta.titoloLogico}
                     </p>
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <select
-                          value={scelta.porzioneSelezionataId}
-                          onChange={(e) => {
-                            if (e.target.value === "SWAP") setSwapTarget(scelta.titoloLogico);
-                            else onPorzioneChange(pasto.id, scelta.titoloLogico, e.target.value);
-                          }}
-                          className={`w-full appearance-none bg-[#F8F6F2] rounded-2xl px-3.5 py-3 pr-10 text-sm font-semibold border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer ${
-                            scelta.porzioneSelezionataId === "NIENTE" ? "text-[#9A9187]" : "text-[#1C1915]"
-                          }`}
-                        >
-                          <option value="NIENTE" hidden>Nessun alimento...</option>
-                          {scelta.alternative.map((p) => (
-                            <option key={p.id} value={p.id} className="text-[#1C1915]">
-                              {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura} {p.note ? `(${p.note})` : ""}
-                            </option>
-                          ))}
-                          <option value="SWAP" className="text-[#1C1915]">🔄 Sostituisci alimento...</option>
-                        </select>
-                        <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
-                          <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
-                        </div>
-                      </div>
-                      
+                    <div className="relative">
                       {scelta.porzioneSelezionataId !== "NIENTE" && (
                         <button
-                          onClick={() => onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE")}
-                          className="w-[46px] h-[46px] flex-shrink-0 flex items-center justify-center bg-[#F8F6F2] hover:bg-[#F3EFE9] rounded-2xl text-[#9A9187] hover:text-[#EF4444] transition-colors border border-black/5"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE");
+                          }}
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-xl text-[#9A9187] hover:text-[#EF4444] hover:bg-black/5 transition-colors"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       )}
+                      <select
+                        value={scelta.porzioneSelezionataId}
+                        onChange={(e) => {
+                          if (e.target.value === "SWAP") setSwapTarget(scelta.titoloLogico);
+                          else onPorzioneChange(pasto.id, scelta.titoloLogico, e.target.value);
+                        }}
+                        className={`w-full appearance-none bg-[#F8F6F2] rounded-2xl ${scelta.porzioneSelezionataId !== "NIENTE" ? 'pl-11' : 'pl-3.5'} py-3 pr-10 text-sm font-semibold border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer ${
+                          scelta.porzioneSelezionataId === "NIENTE" ? "text-[#9A9187]" : "text-[#1C1915]"
+                        }`}
+                      >
+                        <option value="NIENTE" hidden>Nessun alimento...</option>
+                        {scelta.alternative.map((p) => (
+                          <option key={p.id} value={p.id} className="text-[#1C1915]">
+                            {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura} {p.note ? `(${p.note})` : ""}
+                          </option>
+                        ))}
+                        <option value="SWAP" className="text-[#1C1915]">🔄 Sostituisci alimento...</option>
+                      </select>
+                      <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
+                        <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
+                      </div>
                     </div>
                   </div>
                 );
