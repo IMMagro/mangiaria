@@ -8,6 +8,7 @@
 - **Tailwind CSS v4**: Utility classes are used directly in JSX. Global CSS and `@font-face` rules go in `src/index.css`.
 - **CSS Imports**: Keep CSS `@import` statements strictly at the top of `src/index.css`.
 - **Components**: Always export components as `default exports`.
+- **No Emojis in UI**: Emojis are STRICTLY BANNED as a substitute for proper UI icons. Only use high-quality SVG/component icons (e.g. lucide-react) for a premium look. When you need high-level icons or design modifications, you MUST invoke the `design-orchestrator` skill.
 
 ## 🤖 Custom Agent Rules
 - **Continuous Auto-Push**: Automatically run `git commit` and `git push` after EVERY user-confirmed code modification.
