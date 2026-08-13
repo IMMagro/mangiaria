@@ -1,24 +1,17 @@
-# figma-make-app
+# Mangiaria - Figma Make WebApp
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+## ⚠️ Gotchas & Landmines
+- **Figma Webview Limitations**: DO NOT use native browser popups like `confirm()`, `alert()`, or `prompt()`. They are blocked by the Figma/Cursor webview and will silently fail, breaking execution. Always build custom UI modals (e.g., `Sheet` or inline overlays) for user confirmations.
+- **Quotes in Strings**: Use double quotes for strings containing apostrophes (e.g., `"We're here"`). Unescaped apostrophes in single-quoted strings break the Vite build.
 
+## 🎨 Design Rules
+- **Tailwind CSS v4**: Utility classes are used directly in JSX. Global CSS and `@font-face` rules go in `src/index.css`.
+- **CSS Imports**: Keep CSS `@import` statements strictly at the top of `src/index.css`.
+- **Components**: Always export components as `default exports`.
 
-## Styling
-
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
-
-`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
-
-## Code quality
-
-- Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
-- Ensure JSX tags are closed and braces are balanced.
-- Export components as default exports.
-
-## Custom Agent Rules
-
-- **CRITICAL RULE**: Every time the user accepts or confirms a code modification, you MUST automatically commit and push the changes to Git (Continuous Auto-Push Mode).
-- **skill-integrator**: Whenever a new skill is created or installed, you must invoke the skill-integrator skill to analyze and register its automations in AGENTS.md.
-- **theme-factory**: Whenever you create or modify UI components, consider invoking the theme-factory skill to ensure color palette and typography consistency.
-- **design-orchestrator**: Whenever the user asks for a high-level UI modification, aesthetic improvement, or page design without specifying tools, invoke the design-orchestrator skill to automatically chain and execute the necessary design skills (frontend-design, theme-factory, icon-generation, etc.).
-- **webapp-testing**: Every time a modification is made to the codebase, you must test the changes using the webapp-testing skill to verify frontend functionality and guarantee that the output works correctly.
+## 🤖 Custom Agent Rules
+- **Continuous Auto-Push**: Automatically run `git commit` and `git push` after EVERY user-confirmed code modification.
+- **Skill Integrator**: Run `skill-integrator` to register automations when a new skill is installed.
+- **Design Orchestrator**: Run `design-orchestrator` (which chains `frontend-design`, `theme-factory`, etc.) for high-level UI/aesthetic requests.
+- **Theme Factory**: Invoke `theme-factory` when creating/modifying components to ensure palette & typography consistency.
+- **Webapp Testing**: Test frontend modifications using `webapp-testing` before declaring success to ensure the output actually works.
