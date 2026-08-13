@@ -18,6 +18,7 @@ export default function SwapAlimentoSheet({ open, onClose, onSwap, titoloLogico 
   
   const [externalResults, setExternalResults] = useState<AlimentoDef[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   // Filtra risultati locali
   const localResults = allAlimenti().filter((a) => a.nome.toLowerCase().includes(search.toLowerCase()));
@@ -168,3 +169,4 @@ export default function SwapAlimentoSheet({ open, onClose, onSwap, titoloLogico 
     </Sheet>
   );
 }
+

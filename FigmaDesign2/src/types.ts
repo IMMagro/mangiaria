@@ -87,7 +87,7 @@ export interface Profilo {
 }
 
 export interface Impostazioni {
-  fabDefault: "spesa" | "pasto";
+  fabDefault: "spesa" | "pasto" | "barcode";
   notifiche: boolean;
   acquaMax: number; // bicchieri al giorno (max)
   onboardingCompleto?: boolean;
@@ -99,3 +99,4 @@ export interface Dietologo {
   prossimaVisita: string | null; // ISO datetime, es. "2026-08-20T15:30"
   note?: string;
 }
+

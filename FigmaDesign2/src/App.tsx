@@ -7,6 +7,8 @@ import FabMenu from "./components/FabMenu";
 import AddSpesaSheet from "./components/AddSpesaSheet";
 import AddPastoSheet from "./components/AddPastoSheet";
 import ToastHost from "./components/Toast";
+import BarcodeScannerSheet from "./components/BarcodeScannerSheet";
+import SelectMealSheet from "./components/SelectMealSheet";
 import StatsScreen from "./screens/StatsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import SpesaScreen from "./screens/SpesaScreen";
@@ -69,6 +71,9 @@ function App() {
   const [fabMenu, setFabMenu] = useState(false);
   const [spesaSheet, setSpesaSheet] = useState(false);
   const [pastoSheet, setPastoSheet] = useState(false);
+  const [scannerSheet, setScannerSheet] = useState(false);
+  const [selectMealSheet, setSelectMealSheet] = useState(false);
+  const [scannedAlimento, setScannedAlimento] = useState<{ alimento: any; quantita: number } | null>(null);
 
   const profilo = useProfilo();
   const impostazioni = useImpostazioni();
@@ -379,3 +384,5 @@ function App() {
     </div>
   );
 }
+
+

@@ -332,3 +332,4 @@ export function useCardExpanded(pastoId: string, defaultExpanded: boolean): bool
 export function toggleCardExpanded(pastoId: string, current: boolean) {
   uiCardsStore.set((m) => ({ ...m, [pastoId]: !current }));
 }
+

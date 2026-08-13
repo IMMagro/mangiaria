@@ -42,3 +42,4 @@ export default function FabMenu({ open, onClose, onSpesa, onPasto }: Props) {
     </div>
   );
 }
+
