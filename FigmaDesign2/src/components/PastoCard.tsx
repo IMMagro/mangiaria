@@ -92,7 +92,19 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                     <p className="text-[10px] font-bold text-[#9A9187] uppercase tracking-widest mb-1.5">
                       {scelta.titoloLogico}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
+                      {scelta.porzioneSelezionataId !== "NIENTE" && (
+                        <button
+                          onClick={() => onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE")}
+                          className="w-7 h-7 flex-shrink-0 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded-full text-[#9A9187] hover:text-[#EF4444] transition-colors"
+                          title="Rimuovi alimento"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+
                       <div className="relative flex-1">
                         <select
                           value={scelta.porzioneSelezionataId}
@@ -110,23 +122,12 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                               {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura} {p.note ? `(${p.note})` : ""}
                             </option>
                           ))}
-                          <option value="SWAP" className="text-[#1C1915]">🔄 Sostituisci alimento...</option>
+                          <option value="SWAP" className="text-[#1C1915]">⟲ Sostituisci alimento...</option>
                         </select>
                         <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
                           <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
                         </div>
                       </div>
-                      
-                      {scelta.porzioneSelezionataId !== "NIENTE" && (
-                        <button
-                          onClick={() => onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE")}
-                          className="w-[46px] h-[46px] flex-shrink-0 flex items-center justify-center bg-[#F8F6F2] hover:bg-[#F3EFE9] rounded-2xl text-[#9A9187] hover:text-[#EF4444] transition-colors border border-black/5"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
                     </div>
                   </div>
                 );
