@@ -117,15 +117,21 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                             onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE");
                           }
                         }}
-                        className="relative z-40 w-full bg-white rounded-2xl"
+                        whileDrag={{ zIndex: 50, scale: 1.02 }}
+                        className="relative z-10 w-full bg-white rounded-2xl"
                       >
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9A9187] pointer-events-none opacity-50">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                            <path d="M4 9h16M4 15h16" />
+                          </svg>
+                        </div>
                         <select
                           value={scelta.porzioneSelezionataId}
                           onChange={(e) => {
                             if (e.target.value === "SWAP") setSwapTarget(scelta.titoloLogico);
                             else onPorzioneChange(pasto.id, scelta.titoloLogico, e.target.value);
                           }}
-                          className={`w-full appearance-none bg-[#F8F6F2] rounded-2xl px-3.5 py-3 pr-10 text-sm font-semibold border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer ${
+                          className={`w-full appearance-none bg-[#F8F6F2] rounded-2xl pl-10 py-3 pr-10 text-sm font-semibold border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer ${
                             scelta.porzioneSelezionataId === "NIENTE" ? "text-[#9A9187]" : "text-[#1C1915]"
                           }`}
                         >
