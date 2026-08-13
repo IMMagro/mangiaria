@@ -7,6 +7,12 @@ import type {
   DiarioPasto, SceltaVoce, Porzione, CategoriaAlimento, UnitaMisura, StatoPasto,
 } from "../types";
 
+import iconMealColazione from "../assets/icons/meal_colazione_256.png";
+import iconMealSpuntinoMattina from "../assets/icons/meal_spuntino_mattina_256.png";
+import iconMealPranzo from "../assets/icons/meal_pranzo_256.png";
+import iconMealSpuntinoPomeriggio from "../assets/icons/meal_spuntino_pomeriggio_256.png";
+import iconMealCena from "../assets/icons/meal_cena_256.png";
+
 // ── Step definitions ─────────────────────────────────────────────────────────
 type StepId =
   | "benvenuto" | "sesso" | "eta" | "peso" | "altezza"
@@ -108,7 +114,11 @@ const PASTO_LABEL: Record<TipoPasto, string> = {
   cena: "Cena",
 };
 const PASTO_ICON: Record<TipoPasto, string> = {
-  colazione: "☀️", spuntinoMattina: "🍎", pranzo: "🌤️", spuntinoPomeriggio: "🍵", cena: "🌙",
+  colazione: iconMealColazione, 
+  spuntinoMattina: iconMealSpuntinoMattina, 
+  pranzo: iconMealPranzo, 
+  spuntinoPomeriggio: iconMealSpuntinoPomeriggio, 
+  cena: iconMealCena,
 };
 const GIORNI_SHORT = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 // JS weekdays: 0=Sun, 1=Mon ... 6=Sat — map from idx 0(Mon)..6(Sun)
@@ -1042,7 +1052,7 @@ function ContentPiano({ dati, setDati, accent }: { dati: Dati; setDati: React.Di
               <button className="w-full flex items-center justify-between px-4 py-3"
                 onClick={() => setOpenMeal(isOpen ? null : tipo)}>
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-base flex-shrink-0">{PASTO_ICON[tipo]}</span>
+                  <img src={PASTO_ICON[tipo]} alt={PASTO_LABEL[tipo]} className="w-6 h-6 flex-shrink-0 object-contain drop-shadow-sm" />
                   <span className="text-[13px] font-bold text-[#1C1915]">{PASTO_LABEL[tipo]}</span>
                   {hasData && !isOpen && (
                     <span className="text-[11px] font-semibold truncate" style={{ color: accent }}>
