@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import type { DiarioPasto, StatoPasto } from "../types";
 import StatoChip from "./StatoChip";
 import { macroPasto } from "../data";
 import { TIPO_FOTO as FOTO, TIPO_ORA as ORA, TIPO_LABEL_BREVE as LABEL } from "../mealMeta";
 
-import { useCardExpanded, toggleCardExpanded, transientStore, setTransient } from "../store";
+import { useCardExpanded, toggleCardExpanded } from "../store";
 import SwapAlimentoSheet from "./SwapAlimentoSheet";
 
 interface Props {
@@ -93,45 +92,15 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                     <p className="text-[10px] font-bold text-[#9A9187] uppercase tracking-widest mb-1.5">
                       {scelta.titoloLogico}
                     </p>
-                    <div className="relative rounded-2xl">
-                      <motion.div
-                        drag={scelta.porzioneSelezionataId !== "NIENTE"}
-                        dragSnapToOrigin={true}
-                        onDragStart={() => setTransient({ isDraggingFood: true })}
-                        onDrag={(e, info) => {
-                          const bounds = transientStore.get().fabBounds;
-                          if (bounds) {
-                            const point = info.point;
-                            // Check if cursor is over the FAB
-                            const isHovering = point.x >= bounds.left && point.x <= bounds.right && point.y >= bounds.top && point.y <= bounds.bottom;
-                            if (transientStore.get().isHoveringTrash !== isHovering) {
-                              setTransient({ isHoveringTrash: isHovering });
-                            }
-                          }
-                        }}
-                        onDragEnd={() => {
-                          const { isHoveringTrash } = transientStore.get();
-                          setTransient({ isDraggingFood: false, isHoveringTrash: false });
-                          if (isHoveringTrash) {
-                            setTransient({ lastDeletedFood: { pastoId: pasto.id, titoloLogico: scelta.titoloLogico, porzioneId: scelta.porzioneSelezionataId } });
-                            onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE");
-                          }
-                        }}
-                        whileDrag={{ zIndex: 50, scale: 1.02 }}
-                        className="relative z-10 w-full bg-white rounded-2xl"
-                      >
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9A9187] pointer-events-none opacity-50">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                            <path d="M4 9h16M4 15h16" />
-                          </svg>
-                        </div>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
                         <select
                           value={scelta.porzioneSelezionataId}
                           onChange={(e) => {
                             if (e.target.value === "SWAP") setSwapTarget(scelta.titoloLogico);
                             else onPorzioneChange(pasto.id, scelta.titoloLogico, e.target.value);
                           }}
-                          className={`w-full appearance-none bg-[#F8F6F2] rounded-2xl pl-10 py-3 pr-10 text-sm font-semibold border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer ${
+                          className={`w-full appearance-none bg-[#F8F6F2] rounded-2xl px-3.5 py-3 pr-10 text-sm font-semibold border border-black/5 focus:outline-none focus:ring-2 focus:ring-[#27C882]/50 focus:border-[#27C882] transition-all cursor-pointer ${
                             scelta.porzioneSelezionataId === "NIENTE" ? "text-[#9A9187]" : "text-[#1C1915]"
                           }`}
                         >
@@ -141,12 +110,23 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                               {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura} {p.note ? `(${p.note})` : ""}
                             </option>
                           ))}
-                          <option value="SWAP" className="text-[#1C1915]">⟲ Sostituisci alimento...</option>
+                          <option value="SWAP" className="text-[#1C1915]">🔄 Sostituisci alimento...</option>
                         </select>
                         <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
                           <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
                         </div>
-                      </motion.div>
+                      </div>
+                      
+                      {scelta.porzioneSelezionataId !== "NIENTE" && (
+                        <button
+                          onClick={() => onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE")}
+                          className="w-[46px] h-[46px] flex-shrink-0 flex items-center justify-center bg-[#F8F6F2] hover:bg-[#F3EFE9] rounded-2xl text-[#9A9187] hover:text-[#EF4444] transition-colors border border-black/5"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -171,5 +151,3 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
     </div>
   );
 }
-
-

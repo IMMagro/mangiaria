@@ -3,11 +3,9 @@ interface Props {
   onClose: () => void;
   onSpesa: () => void;
   onPasto: () => void;
-  deletedItem?: { pastoId: string; titoloLogico: string; porzioneId: string } | null;
-  onRecover?: () => void;
 }
 
-export default function FabMenu({ open, onClose, onSpesa, onPasto, deletedItem, onRecover }: Props) {
+export default function FabMenu({ open, onClose, onSpesa, onPasto }: Props) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40" onClick={onClose}>
@@ -18,23 +16,6 @@ export default function FabMenu({ open, onClose, onSpesa, onPasto, deletedItem, 
           onClick={(e) => e.stopPropagation()}
           style={{ transformOrigin: "bottom center" }}
         >
-          {deletedItem && onRecover && (
-            <button
-              onClick={() => { onRecover(); onClose(); }}
-              className="w-full flex items-center gap-3 px-4 py-4 active:bg-[#F8F6F2] transition-colors border-b border-[#F0EDE8]"
-            >
-              <span className="w-10 h-10 rounded-2xl bg-[#EF4444]/12 flex items-center justify-center text-[#EF4444]">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="1 4 1 10 7 10"></polyline>
-                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                </svg>
-              </span>
-              <div className="text-left">
-                <p className="text-sm font-bold text-[#1C1915]">Recupera alimento</p>
-                <p className="text-[11px] text-[#9A9187]">Ripristina l'ultimo alimento rimosso</p>
-              </div>
-            </button>
-          )}
           <button
             onClick={() => { onPasto(); onClose(); }}
             className="w-full flex items-center gap-3 px-4 py-4 active:bg-[#F8F6F2] transition-colors border-b border-[#F0EDE8]"

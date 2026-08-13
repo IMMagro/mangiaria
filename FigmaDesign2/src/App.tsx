@@ -23,8 +23,6 @@ import {
   removeExtraPasto,
   sostituisciAlimento,
   claimStreak,
-  useTransient,
-  setTransient,
 } from "./store";
 import { pianificaVisita } from "./notifications";
 import type { StatoPasto } from "./types";
@@ -76,7 +74,6 @@ function App() {
   const impostazioni = useImpostazioni();
   const dietologo = useDietologo();
   const giorno = useGiorno(selectedDate);
-  const { lastDeletedFood } = useTransient();
 
   // (Re)schedule the dietitian-visit reminder whenever it or the toggle changes.
   useEffect(() => {
@@ -374,13 +371,6 @@ function App() {
         onClose={() => setFabMenu(false)}
         onSpesa={() => setSpesaSheet(true)}
         onPasto={() => setPastoSheet(true)}
-        deletedItem={lastDeletedFood}
-        onRecover={() => {
-          if (lastDeletedFood) {
-            setPorzione(selectedDate, lastDeletedFood.pastoId, lastDeletedFood.titoloLogico, lastDeletedFood.porzioneId);
-            setTransient({ lastDeletedFood: null });
-          }
-        }}
       />
       <AddSpesaSheet open={spesaSheet} onClose={() => setSpesaSheet(false)} />
       <AddPastoSheet open={pastoSheet} onClose={() => setPastoSheet(false)} data={selectedDate} />
