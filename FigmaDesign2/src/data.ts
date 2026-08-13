@@ -16,6 +16,7 @@ export interface Nutri {
   carbo: number;
   proteine: number;
   grassi: number;
+  fibra?: number;
 }
 
 export interface AlimentoDef extends Alimento {

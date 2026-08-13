@@ -9,6 +9,7 @@ export interface Alimento {
   categoria: CategoriaAlimento;
   unitaMisura: UnitaMisura;
   isDispensa?: boolean;
+  sorgente?: "locale" | "openfoodfacts";
 }
 
 export interface Porzione {
