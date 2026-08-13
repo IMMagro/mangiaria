@@ -21,3 +21,4 @@ This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin con
 - **skill-integrator**: Whenever a new skill is created or installed, you must invoke the skill-integrator skill to analyze and register its automations in AGENTS.md.
 - **theme-factory**: Whenever you create or modify UI components, consider invoking the theme-factory skill to ensure color palette and typography consistency.
 - **design-orchestrator**: Whenever the user asks for a high-level UI modification, aesthetic improvement, or page design without specifying tools, invoke the design-orchestrator skill to automatically chain and execute the necessary design skills (frontend-design, theme-factory, icon-generation, etc.).
+- **webapp-testing**: Every time a modification is made to the codebase, you must test the changes using the webapp-testing skill to verify frontend functionality and guarantee that the output works correctly.
