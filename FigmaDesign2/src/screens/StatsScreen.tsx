@@ -28,7 +28,7 @@ type Period = typeof PERIODS[number];
 export default function StatsScreen() {
   const [period, setPeriod] = useState<Period>("Oggi");
   const [activeDonut, setActiveDonut] = useState(0);
-  const [infoPopup, setInfoPopup] = useState<{title: string, desc: string} | null>(null);
+  const [infoPopup, setInfoPopup] = useState<string | null>(null);
   const profilo = useProfilo();
   const impostazioni = useImpostazioni();
   const acqua = useAcquaOggi();
@@ -106,14 +106,31 @@ export default function StatsScreen() {
         {/* KPI tiles */}
         <div className="grid grid-cols-2 gap-3">
           {KPI.map((k) => (
-            <div key={k.label} className="bg-white rounded-3xl px-4 py-4 shadow-sm border border-black/5">
-              <button onClick={() => setInfoPopup({title: k.label, desc: k.desc})} className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest mb-1 text-left active:scale-95 transition-transform flex items-center gap-1 w-full">
-                {k.label} <span className="text-[13px] opacity-70">ℹ️</span>
+            <div key={k.label} className="bg-white rounded-3xl px-4 py-4 shadow-sm border border-black/5 relative">
+              <button 
+                onClick={() => setInfoPopup(infoPopup === k.label ? null : k.label)} 
+                className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest mb-1 text-left active:scale-95 transition-transform flex items-center gap-1 w-full"
+              >
+                {k.label} 
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
               </button>
-              <div className="flex items-baseline gap-1">
+              <div className="flex items-baseline gap-1 relative z-0">
                 <span className="font-display text-3xl font-black text-[#1C1915] leading-none">{k.value}</span>
                 <span className="text-xs text-[#9A9187] font-medium">{k.unit}</span>
               </div>
+              
+              {infoPopup === k.label && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setInfoPopup(null)} />
+                  <div className="absolute top-10 left-2 right-2 bg-[#1C1915] text-white p-3 rounded-2xl shadow-xl z-50 text-[11px] leading-relaxed animate-in fade-in slide-in-from-top-2">
+                    {k.desc}
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -297,18 +314,6 @@ export default function StatsScreen() {
 
       </div>
 
-      {/* Info Popup */}
-      {infoPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/20 backdrop-blur-sm" onClick={() => setInfoPopup(null)}>
-          <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            <h3 className="font-display font-black text-xl text-[#1C1915] mb-2">{infoPopup.title}</h3>
-            <p className="text-sm text-[#6b645b] leading-relaxed mb-6">{infoPopup.desc}</p>
-            <button onClick={() => setInfoPopup(null)} className="w-full py-3.5 bg-[#F0EDE8] rounded-2xl text-sm font-bold text-[#1C1915] active:scale-95 transition-transform">
-              Ho capito
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -110,9 +110,25 @@ Transform user request into an icon-specific prompt:
 
 ### Step 3: Generate the Icon
 
-Execute the script:
+There are two approaches to generate icons depending on the context:
+
+#### Approach A: Using IDE Built-in Image Generation (Recommended if no API Key)
+Use this approach if `GOOGLE_API_KEY` is not set or if you prefer using the IDE's built-in `generate_image` tool.
+1. Generate the image using the IDE's built-in image generator tool (ensure the prompt specifies a solid white background and square format).
+2. The IDE will save the image as an artifact.
+3. Pass the artifact's path to the script using the `--input` (`-i`) parameter to process it (resize, format, remove background):
 ```bash
-python3 .agents/skills/icon-generation/scripts/icon_generator.py \
+python3 .agents/skills/icon-generation/icon_generator.py \
+  --input "/path/to/artifact_image.png" \
+  --size 512 256 \
+  --bg builtin \
+  --output "/path/to/final_icon"
+```
+
+#### Approach B: Using the Script Directly (Requires API Key)
+Execute the script using the Gemini API directly:
+```bash
+python3 .agents/skills/icon-generation/icon_generator.py \
   --prompt "your enhanced prompt" \
   --style "flat" \
   --size 1024 \
@@ -121,7 +137,7 @@ python3 .agents/skills/icon-generation/scripts/icon_generator.py \
 
 With multiple sizes:
 ```bash
-python3 .agents/skills/icon-generation/scripts/icon_generator.py \
+python3 .agents/skills/icon-generation/icon_generator.py \
   --prompt "your enhanced prompt" \
   --style "flat" \
   --size 1024 512 256 128 \
@@ -131,7 +147,7 @@ This generates: `icon_1024.png`, `icon_512.png`, `icon_256.png`, `icon_128.png`
 
 Batch generation (multiple icons):
 ```bash
-python3 .agents/skills/icon-generation/scripts/icon_generator.py \
+python3 .agents/skills/icon-generation/icon_generator.py \
   --batch '["home", "search", "profile", "settings"]' \
   --style "flat" \
   --size 512 \
@@ -162,6 +178,7 @@ This generates: `home_512.png`, `search_512.png`, `profile_512.png`, `settings_5
 | `--batch` | `-b` | JSON array of concepts | None |
 | `--colors` | `-c` | Color preferences | AI choice |
 | `--reference` | `-r` | Reference image(s) for style matching | None |
+| `--input` | `-i` | Existing image path (skips API call) | None |
 
 ## Background Removal Methods
 

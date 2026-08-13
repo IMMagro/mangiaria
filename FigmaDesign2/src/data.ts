@@ -91,6 +91,7 @@ function round(m: Macro): Macro {
 /** Macro of a single meal (its currently-selected portions). */
 export function macroPasto(pasto: DiarioPasto): Macro {
   return pasto.scelteEffettuate.reduce((acc, s) => {
+    if (s.porzioneSelezionataId === "NIENTE") return acc;
     const sel = s.alternative.find((p) => p.id === s.porzioneSelezionataId) ?? s.alternative[0];
     return sel ? add(acc, macroPorzione(sel)) : acc;
   }, { ...ZERO });

@@ -88,7 +88,7 @@ export default function PianoEditor({ open, onClose }: Props) {
   const removeAlternativa = (pi: number, ci: number, ai: number) =>
     editScelta(pi, ci, (s) => {
       const alternative = s.alternative.filter((_, i) => i !== ai);
-      const stillSel = alternative.some((a) => a.id === s.porzioneSelezionataId);
+      const stillSel = s.porzioneSelezionataId === "NIENTE" || alternative.some((a) => a.id === s.porzioneSelezionataId);
       return { ...s, alternative, porzioneSelezionataId: stillSel ? s.porzioneSelezionataId : alternative[0]?.id ?? "" };
     });
   const setQuantita = (pi: number, ci: number, ai: number, quantita: number) =>

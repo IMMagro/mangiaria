@@ -138,6 +138,8 @@ def get_background_remove_module():
         import sys
         if str(bg_remove_path) not in sys.path:
             sys.path.insert(0, str(bg_remove_path))
+       
+        # pyrefly: ignore [missing-import]
         from background_remove import remove_background
         return remove_background
     else:

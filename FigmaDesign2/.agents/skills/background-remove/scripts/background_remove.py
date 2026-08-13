@@ -7,6 +7,7 @@ def remove_background(input_path: str, output_path: str, method: str = "rembg") 
     try:
         if method == "rembg":
             try:
+                # pyrefly: ignore [missing-import]
                 import rembg
                 with open(input_path, 'rb') as i:
                     with open(output_path, 'wb') as o:
