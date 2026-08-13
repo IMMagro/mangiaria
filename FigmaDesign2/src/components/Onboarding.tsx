@@ -946,13 +946,19 @@ function ContentObiettivo({ dati, setDati }: { dati: Dati; setDati: React.Dispat
   );
 }
 
+import iconOmnivoro from "../assets/icons/diet_omnivore_256.png";
+import iconFlexitariano from "../assets/icons/diet_flexitarian_256.png";
+import iconVegetariano from "../assets/icons/diet_vegetarian_256.png";
+import iconPescatariano from "../assets/icons/diet_pescatarian_256.png";
+import iconVegano from "../assets/icons/diet_vegan_256.png";
+
 // ── Content: Dieta ────────────────────────────────────────────────────────────
-const DIETA_OPT: { key: TipoDieta; label: string; desc: string; icon: string }[] = [
-  { key: "onnivoro",     label: "Onnivoro",     desc: "Mangio di tutto",             icon: "🍖" },
-  { key: "flexitariano", label: "Flexitariano", desc: "Prevalentemente vegetale",    icon: "🥗" },
-  { key: "vegetariano",  label: "Vegetariano",  desc: "No carne, sì latticini/uova", icon: "🥦" },
-  { key: "pescatariano", label: "Pescatariano", desc: "No carne, sì pesce",          icon: "🐟" },
-  { key: "vegano",       label: "Vegano",       desc: "Solo alimenti vegetali",      icon: "🌱" },
+const DIETA_OPT: { key: TipoDieta; label: string; desc: string; iconImg: string }[] = [
+  { key: "onnivoro",     label: "Onnivoro",     desc: "Mangio di tutto",             iconImg: iconOmnivoro },
+  { key: "flexitariano", label: "Flexitariano", desc: "Prevalentemente vegetale",    iconImg: iconFlexitariano },
+  { key: "vegetariano",  label: "Vegetariano",  desc: "No carne, sì latticini/uova", iconImg: iconVegetariano },
+  { key: "pescatariano", label: "Pescatariano", desc: "No carne, sì pesce",          iconImg: iconPescatariano },
+  { key: "vegano",       label: "Vegano",       desc: "Solo alimenti vegetali",      iconImg: iconVegano },
 ];
 
 function ContentDieta({ dati, setDati }: { dati: Dati; setDati: React.Dispatch<React.SetStateAction<Dati>> }) {
@@ -964,7 +970,9 @@ function ContentDieta({ dati, setDati }: { dati: Dati; setDati: React.Dispatch<R
           <button key={o.key} onClick={() => setDati((d) => ({ ...d, dieta: o.key }))}
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all active:scale-[0.98] text-left"
             style={{ borderColor: sel ? "#CA8A04" : "rgba(0,0,0,0.07)", background: sel ? "#FEFCE8" : "#F7F5F2" }}>
-            <span className="text-2xl w-8 text-center flex-shrink-0">{o.icon}</span>
+            <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg overflow-hidden mix-blend-multiply">
+              <img src={o.iconImg} alt={o.label} className="w-full h-full object-contain" />
+            </div>
             <div className="flex-1">
               <p className="text-[14px] font-bold text-[#1C1915]">{o.label}</p>
               <p className="text-[11px] text-[#9A9187] font-medium">{o.desc}</p>
