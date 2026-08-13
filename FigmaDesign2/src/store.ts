@@ -332,3 +332,23 @@ export function useCardExpanded(pastoId: string, defaultExpanded: boolean): bool
 export function toggleCardExpanded(pastoId: string, current: boolean) {
   uiCardsStore.set((m) => ({ ...m, [pastoId]: !current }));
 }
+
+export interface TransientState {
+  isDraggingFood: boolean;
+  isHoveringTrash: boolean;
+  fabBounds: DOMRect | null;
+  lastDeletedFood: { pastoId: string, titoloLogico: string, porzioneId: string } | null;
+}
+export const transientStore = createStore<TransientState>("mng_transient", {
+  isDraggingFood: false,
+  isHoveringTrash: false,
+  fabBounds: null,
+  lastDeletedFood: null,
+});
+export function useTransient() {
+  return useStore(transientStore);
+}
+export function setTransient(updater: Partial<TransientState>) {
+  transientStore.set((prev) => ({ ...prev, ...updater }));
+}
+

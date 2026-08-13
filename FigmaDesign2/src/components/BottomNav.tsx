@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
+import { useTransient, setTransient } from "../store";
 
 export type Tab = "home" | "stats" | "piano" | "profilo";
 
@@ -34,6 +35,23 @@ interface Props {
 export default function BottomNav({ activeTab, onChange, onFabTap, onFabHold }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const held = useRef(false);
+  const fabRef = useRef<HTMLButtonElement>(null);
+  const { isDraggingFood, isHoveringTrash } = useTransient();
+
+  useEffect(() => {
+    function updateBounds() {
+      if (fabRef.current) {
+        setTransient({ fabBounds: fabRef.current.getBoundingClientRect() });
+      }
+    }
+    updateBounds();
+    window.addEventListener("resize", updateBounds);
+    window.addEventListener("scroll", updateBounds);
+    return () => {
+      window.removeEventListener("resize", updateBounds);
+      window.removeEventListener("scroll", updateBounds);
+    };
+  }, []);
 
   function clear() {
     if (timer.current) {
@@ -83,21 +101,34 @@ export default function BottomNav({ activeTab, onChange, onFabTap, onFabHold }: 
           {/* FAB — tap = azione predefinita, tieni premuto = menu */}
           <div className="-mt-7">
             <button
+              ref={fabRef}
               onPointerDown={down}
               onPointerUp={up}
               onPointerLeave={clear}
               onPointerCancel={clear}
               onContextMenu={(e) => e.preventDefault()}
-              aria-label="Aggiungi"
-              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl active:scale-95 transition-all touch-none select-none"
+              aria-label={isDraggingFood ? "Elimina alimento" : "Aggiungi"}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl transition-all touch-none select-none ${
+                isDraggingFood 
+                  ? isHoveringTrash ? "scale-110 bg-[#EF4444]" : "scale-100 bg-[#EF4444]" 
+                  : "active:scale-95"
+              }`}
               style={{
-                background: "linear-gradient(135deg, #27C882 0%, #1AA86A 100%)",
-                boxShadow: "0 8px 24px rgba(39, 200, 130, 0.4)",
+                background: isDraggingFood ? undefined : "linear-gradient(135deg, #27C882 0%, #1AA86A 100%)",
+                boxShadow: isDraggingFood 
+                  ? (isHoveringTrash ? "0 12px 32px rgba(239, 68, 68, 0.6)" : "0 8px 24px rgba(239, 68, 68, 0.4)")
+                  : "0 8px 24px rgba(39, 200, 130, 0.4)",
               }}
             >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-              </svg>
+              {isDraggingFood ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              ) : (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+              )}
             </button>
           </div>
           <NavItem
@@ -125,3 +156,4 @@ export default function BottomNav({ activeTab, onChange, onFabTap, onFabHold }: 
     </nav>
   );
 }
+

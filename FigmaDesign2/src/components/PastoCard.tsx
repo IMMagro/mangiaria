@@ -5,7 +5,7 @@ import StatoChip from "./StatoChip";
 import { macroPasto } from "../data";
 import { TIPO_FOTO as FOTO, TIPO_ORA as ORA, TIPO_LABEL_BREVE as LABEL } from "../mealMeta";
 
-import { useCardExpanded, toggleCardExpanded } from "../store";
+import { useCardExpanded, toggleCardExpanded, transientStore, setTransient } from "../store";
 import SwapAlimentoSheet from "./SwapAlimentoSheet";
 
 interface Props {
@@ -93,26 +93,31 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                     <p className="text-[10px] font-bold text-[#9A9187] uppercase tracking-widest mb-1.5">
                       {scelta.titoloLogico}
                     </p>
-                    <div className="relative overflow-hidden rounded-2xl bg-[#EF4444]">
-                      {/* Swipe Background */}
-                      {scelta.porzioneSelezionataId !== "NIENTE" && (
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pr-10 w-full pointer-events-none">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </div>
-                      )}
-
+                    <div className="relative rounded-2xl">
                       <motion.div
-                        drag={scelta.porzioneSelezionataId !== "NIENTE" ? "x" : false}
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={{ left: 0, right: 0.6 }}
-                        onDragEnd={(e, info) => {
-                          if (info.offset.x > 80) {
+                        drag={scelta.porzioneSelezionataId !== "NIENTE"}
+                        dragSnapToOrigin={true}
+                        onDragStart={() => setTransient({ isDraggingFood: true })}
+                        onDrag={(e, info) => {
+                          const bounds = transientStore.get().fabBounds;
+                          if (bounds) {
+                            const point = info.point;
+                            // Check if cursor is over the FAB
+                            const isHovering = point.x >= bounds.left && point.x <= bounds.right && point.y >= bounds.top && point.y <= bounds.bottom;
+                            if (transientStore.get().isHoveringTrash !== isHovering) {
+                              setTransient({ isHoveringTrash: isHovering });
+                            }
+                          }
+                        }}
+                        onDragEnd={() => {
+                          const { isHoveringTrash } = transientStore.get();
+                          setTransient({ isDraggingFood: false, isHoveringTrash: false });
+                          if (isHoveringTrash) {
+                            setTransient({ lastDeletedFood: { pastoId: pasto.id, titoloLogico: scelta.titoloLogico, porzioneId: scelta.porzioneSelezionataId } });
                             onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE");
                           }
                         }}
-                        className="relative z-10 w-full bg-white rounded-2xl"
+                        className="relative z-40 w-full bg-white rounded-2xl"
                       >
                         <select
                           value={scelta.porzioneSelezionataId}
@@ -160,3 +165,5 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
     </div>
   );
 }
+
+
