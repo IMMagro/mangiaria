@@ -123,7 +123,7 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                             {p.alimento.nome} · {p.quantita} {p.alimento.unitaMisura} {p.note ? `(${p.note})` : ""}
                           </option>
                         ))}
-                        <option value="SWAP" className="text-[#1C1915]">🔄 Sostituisci alimento...</option>
+                        <option value="SWAP" className="text-[#1C1915]">Sostituisci alimento...</option>
                       </select>
                       <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
                         <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
