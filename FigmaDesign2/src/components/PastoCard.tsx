@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import type { DiarioPasto, StatoPasto } from "../types";
 import StatoChip from "./StatoChip";
 import { macroPasto } from "../data";
@@ -92,20 +93,27 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                     <p className="text-[10px] font-bold text-[#9A9187] uppercase tracking-widest mb-1.5">
                       {scelta.titoloLogico}
                     </p>
-                    <div className="flex items-center gap-2.5">
+                    <div className="relative overflow-hidden rounded-2xl bg-[#EF4444]">
+                      {/* Swipe Background */}
                       {scelta.porzioneSelezionataId !== "NIENTE" && (
-                        <button
-                          onClick={() => onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE")}
-                          className="w-7 h-7 flex-shrink-0 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded-full text-[#9A9187] hover:text-[#EF4444] transition-colors"
-                          title="Rimuovi alimento"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pr-10 w-full pointer-events-none">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                        </button>
+                        </div>
                       )}
 
-                      <div className="relative flex-1">
+                      <motion.div
+                        drag={scelta.porzioneSelezionataId !== "NIENTE" ? "x" : false}
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={{ left: 0, right: 0.6 }}
+                        onDragEnd={(e, info) => {
+                          if (info.offset.x > 80) {
+                            onPorzioneChange(pasto.id, scelta.titoloLogico, "NIENTE");
+                          }
+                        }}
+                        className="relative z-10 w-full bg-white rounded-2xl"
+                      >
                         <select
                           value={scelta.porzioneSelezionataId}
                           onChange={(e) => {
@@ -127,7 +135,7 @@ export default function PastoCard({ pasto, onStatoChange, onPorzioneChange, onSw
                         <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
                           <span className="text-[#1C1915] text-[10px] font-bold leading-none">▾</span>
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                 );
