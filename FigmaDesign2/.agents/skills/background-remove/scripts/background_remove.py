@@ -20,17 +20,14 @@ def remove_background(input_path: str, output_path: str, method: str = "rembg") 
         elif method == "builtin":
             from PIL import Image
             img = Image.open(input_path).convert("RGBA")
-            datas = img.getdata()
+            pixels = img.load()
             
-            new_data = []
-            for item in datas:
-                # Change all white (also shades of whites) to transparent
-                if item[0] > 240 and item[1] > 240 and item[2] > 240:
-                    new_data.append((255, 255, 255, 0))
-                else:
-                    new_data.append(item)
-                    
-            img.putdata(new_data)
+            for y in range(img.height):
+                for x in range(img.width):
+                    r, g, b, a = pixels[x, y]
+                    if r > 240 and g > 240 and b > 240:
+                        pixels[x, y] = (255, 255, 255, 0)
+            
             # Output format based on extension, fallback to PNG
             ext = Path(output_path).suffix.lower()
             if ext == '.webp':
