@@ -58,11 +58,16 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
         async (decodedText) => {
           if (!isMounted || isProcessing) return;
           isProcessing = true;
-          // Stop scanner
-          await html5QrCode.stop().catch(console.error);
-          scannerRef.current = null;
           
           setStatus('loading');
+
+          // Stop scanner in background to prevent hanging the UI
+          html5QrCode.stop().catch(console.error).finally(() => {
+            if (scannerRef.current === html5QrCode) {
+              scannerRef.current = null;
+            }
+          });
+          
           const p = await fetchProductByBarcode(decodedText);
           if (!isMounted) return;
           if (p) {

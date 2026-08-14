@@ -2,7 +2,12 @@ import type { AlimentoDef } from "./data";
 
 export async function fetchProductByBarcode(barcode: string): Promise<AlimentoDef | null> {
   try {
-    const res = await fetch("https://world.openfoodfacts.org/api/v0/product/" + barcode + ".json");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch("https://world.openfoodfacts.org/api/v0/product/" + barcode + ".json", {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
     const data = await res.json();
 
     if (data.status !== 1 || !data.product) {
