@@ -16,6 +16,9 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
   const [quantita, setQuantita] = useState("100");
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
+  const openRef = useRef(open);
+  useEffect(() => { openRef.current = open; }, [open]);
+
   useEffect(() => {
     if (!open) {
       if (scannerRef.current) {
@@ -42,12 +45,11 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
 
     if (status !== 'scanning') return;
 
-    let isMounted = true;
     let isProcessing = false;
     
     // Slight delay to ensure DOM element is ready for Html5Qrcode
     const timeout = setTimeout(() => {
-      if (!document.getElementById("reader") || !isMounted) return;
+      if (!document.getElementById("reader")) return;
       
       const html5QrCode = new Html5Qrcode("reader");
       scannerRef.current = html5QrCode;
@@ -56,20 +58,15 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 150 } },
         async (decodedText) => {
-          if (!isMounted || isProcessing) return;
+          if (isProcessing) return;
           isProcessing = true;
-          
           setStatus('loading');
 
-          // Stop scanner in background to prevent hanging the UI
-          html5QrCode.stop().catch(console.error).finally(() => {
-            if (scannerRef.current === html5QrCode) {
-              scannerRef.current = null;
-            }
-          });
-          
           const p = await fetchProductByBarcode(decodedText);
-          if (!isMounted) return;
+          
+          // Se nel frattempo l'utente ha chiuso il foglio, scarta il risultato
+          if (!openRef.current) return;
+
           if (p) {
             setProduct(p);
             setStatus('preview');
@@ -80,12 +77,10 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
         () => {} // ignore errors during scan
       ).catch(err => {
         console.error("Camera start failed", err);
-        // Might fail if no camera permissions
       });
     }, 300);
 
     return () => {
-      isMounted = false;
       clearTimeout(timeout);
       if (scannerRef.current) {
         try {
