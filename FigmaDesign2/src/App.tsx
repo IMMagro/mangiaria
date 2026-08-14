@@ -118,6 +118,7 @@ function App() {
 
   function handleFabTap() {
     if (impostazioni.fabDefault === "pasto") setPastoSheet(true);
+    else if (impostazioni.fabDefault === "barcode") setScannerSheet(true);
     else setSpesaSheet(true);
   }
 
@@ -147,7 +148,17 @@ function App() {
                       Ciao, {profilo.nome.split(" ")[0]}!
                     </h1>
                   </div>
-                  <button
+                  <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setScannerSheet(true)}
+                        className="w-11 h-11 rounded-2xl bg-white shadow-sm border border-black/5 flex items-center justify-center active:scale-95 transition-all"
+                        aria-label="Scanner Barcode"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1915" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 7V4h3M17 4h3v3M4 17v3h3M17 20h3v-3M8 8h1v8H8zM11 8h2v8h-2zM15 8h1v8h-1z" />
+                        </svg>
+                      </button>
+                      <button
                     onClick={() => setCalendarOpen(true)}
                     className={`w-11 h-11 rounded-2xl bg-white shadow-sm border border-black/5 flex items-center justify-center active:scale-95 transition-all ${calendarOpen ? "ring-2 ring-[#27C882]" : ""}`}
                     aria-label="Apri calendario"
@@ -156,6 +167,7 @@ function App() {
                       <path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1zM7 11h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2z" />
                     </svg>
                   </button>
+                    </div>
                 </div>
                 {!oggi && (
                   <div className="mt-3 flex items-center gap-2 bg-[#27C882]/10 text-[#1AA86A] text-xs font-semibold px-3 py-2 rounded-2xl">
@@ -376,9 +388,38 @@ function App() {
         onClose={() => setFabMenu(false)}
         onSpesa={() => setSpesaSheet(true)}
         onPasto={() => setPastoSheet(true)}
+        onScanner={() => setScannerSheet(true)}
       />
       <AddSpesaSheet open={spesaSheet} onClose={() => setSpesaSheet(false)} />
       <AddPastoSheet open={pastoSheet} onClose={() => setPastoSheet(false)} data={selectedDate} />
+
+      <BarcodeScannerSheet
+        open={scannerSheet}
+        onClose={() => setScannerSheet(false)}
+        onResult={(alimento, quantita) => {
+          setScannerSheet(false);
+          setScannedAlimento({ alimento, quantita });
+          setSelectMealSheet(true);
+        }}
+      />
+      
+      <SelectMealSheet
+        open={selectMealSheet}
+        onClose={() => setSelectMealSheet(false)}
+        pasti={giorno.pasti}
+        onSelect={(pastoId) => {
+          if (scannedAlimento) {
+            import("./store").then(({ aggiungiAlimentoAPasto }) => {
+              aggiungiAlimentoAPasto(selectedDate, pastoId, {
+                alimento: scannedAlimento.alimento,
+                quantita: scannedAlimento.quantita,
+              });
+            });
+          }
+          setSelectMealSheet(false);
+          setScannedAlimento(null);
+        }}
+      />
 
       <ToastHost />
     </div>

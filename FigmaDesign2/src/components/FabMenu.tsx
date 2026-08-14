@@ -3,9 +3,10 @@ interface Props {
   onClose: () => void;
   onSpesa: () => void;
   onPasto: () => void;
+  onScanner?: () => void;
 }
 
-export default function FabMenu({ open, onClose, onSpesa, onPasto }: Props) {
+export default function FabMenu({ open, onClose, onSpesa, onPasto, onScanner }: Props) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40" onClick={onClose}>
@@ -36,6 +37,22 @@ export default function FabMenu({ open, onClose, onSpesa, onPasto }: Props) {
               <p className="text-[11px] text-[#9A9187]">Un articolo alla lista</p>
             </div>
           </button>
+          {onScanner && (
+            <button
+              onClick={() => { onScanner(); onClose(); }}
+              className="w-full flex items-center gap-3 px-4 py-4 active:bg-[#F8F6F2] transition-colors border-t border-[#F0EDE8]"
+            >
+              <span className="w-10 h-10 rounded-2xl bg-[#F59E0B]/12 flex items-center justify-center text-[#F59E0B]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 7V4h3M17 4h3v3M4 17v3h3M17 20h3v-3M8 8h1v8H8zM11 8h2v8h-2zM15 8h1v8h-1z" />
+                </svg>
+              </span>
+              <div className="text-left">
+                <p className="text-sm font-bold text-[#1C1915]">Scansiona Barcode</p>
+                <p className="text-[11px] text-[#9A9187]">Cerca tramite codice a barre</p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
       <style>{`@keyframes fabpop{from{opacity:0;transform:translateY(8px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}`}</style>

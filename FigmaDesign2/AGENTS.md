@@ -15,4 +15,13 @@
 - **Skill Integrator**: Run `skill-integrator` to register automations when a new skill is installed.
 - **Design Orchestrator**: Run `design-orchestrator` (which chains `frontend-design`, `theme-factory`, etc.) for high-level UI/aesthetic requests.
 - **Theme Factory**: Invoke `theme-factory` when creating/modifying components to ensure palette & typography consistency.
-- **Webapp Testing**: Test frontend modifications using `webapp-testing` before declaring success to ensure the output actually works.
+
+## 👁️ Visual Verification Protocol (Mandatory)
+
+At the end of **every** modification that impacts the UI, frontend, or a visible logic flow, you MUST strictly follow these steps before considering the task complete:
+
+1. **No Code Assumptions:** Do not assume the implementation is correct just because there are no terminal errors.
+2. **Use Computer Control:** Open the web browser pointing to the local test environment (e.g., http://localhost:8443).
+3. **Manual Interaction:** Use mouse and keyboard control to interact with the newly modified element (click buttons, fill forms, open dropdowns).
+4. **Visual Analysis:** Use your screen vision to confirm the layout is intact, colors are correct, and the element responds visually to clicks.
+5. **Report:** Write the outcome of the visual inspection in the chat (e.g., "I looked at the screen, clicked button X, and the modal opened correctly"). If you spot visual defects, fix them autonomously before notifying me.

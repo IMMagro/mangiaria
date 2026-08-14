@@ -3,6 +3,7 @@ import Sheet from "./Sheet";
 import { allAlimenti } from "../data";
 import { showToast } from "./Toast";
 import type { AlimentoDef } from "../data";
+import BarcodeScannerSheet from "./BarcodeScannerSheet";
 
 interface Props {
   open: boolean;
@@ -98,75 +99,96 @@ export default function SwapAlimentoSheet({ open, onClose, onSwap, titoloLogico 
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title={`Sostituisci ${titoloLogico}`}>
-      <div className="space-y-4">
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Cerca alimento..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 text-sm font-medium text-[#1C1915] placeholder:text-[#C5BFB8] focus:outline-none focus:ring-2 focus:ring-[#27C882]/40"
-        />
-
-        {/* List */}
-        <div className="max-h-48 overflow-y-auto space-y-1 bg-white rounded-2xl border border-black/5 p-1 relative">
-          {isSearching && (
-            <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
-              <span className="text-xs font-bold text-[#9A9187] animate-pulse">Ricerca nel database globale...</span>
-            </div>
-          )}
-          {!isSearching && alimenti.length === 0 && (
-            <p className="text-center text-[#9A9187] text-xs p-4">Nessun alimento trovato.</p>
-          )}
-          {alimenti.map((a) => (
+    <>
+      <Sheet open={open} onClose={onClose} title={`Sostituisci ${titoloLogico}`}>
+        <div className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Cerca alimento..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 pr-12 text-sm font-medium text-[#1C1915] placeholder:text-[#C5BFB8] focus:outline-none focus:ring-2 focus:ring-[#27C882]/40"
+            />
             <button
-              key={a.id}
-              onClick={() => setSelId(a.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex justify-between items-center ${
-                selId === a.id ? "bg-[#27C882]/10 text-[#1AA86A]" : "text-[#1C1915] active:bg-[#F8F6F2]"
-              }`}
+              onClick={() => setScannerOpen(true)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center text-[#9A9187] hover:text-[#27C882] hover:bg-[#27C882]/10 transition-colors"
             >
-              <div className="flex flex-col">
-                <span className="truncate max-w-[200px]">{a.nome}</span>
-                {a.sorgente === "openfoodfacts" && (
-                  <span className="text-[9px] font-bold text-[#F59E0B] uppercase tracking-wider">Database Esterno (100g)</span>
-                )}
-              </div>
-              <div className="flex flex-col items-end text-right">
-                <span className="text-[10px] text-[#9A9187] font-bold">{a.nutri.kcal.toFixed(0)} kcal</span>
-                {a.sorgente === "openfoodfacts" && (
-                  <span className="text-[8px] text-[#C5BFB8] font-bold">C:{a.nutri.carbo.toFixed(1)} P:{a.nutri.proteine.toFixed(1)}</span>
-                )}
-              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 7V4h3M17 4h3v3M4 17v3h3M17 20h3v-3M8 8h1v8H8zM11 8h2v8h-2zM15 8h1v8h-1z" />
+              </svg>
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* Quantity */}
-        <div className="flex items-center gap-3 bg-[#F8F6F2] p-1 rounded-2xl">
-          <input
-            type="number"
-            placeholder={sel?.sorgente === "openfoodfacts" ? "Quantità (g)" : "Quantità"}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="flex-1 bg-white rounded-xl px-4 py-3 text-sm font-bold text-[#1C1915] text-center border-none focus:ring-2 focus:ring-[#27C882]/40"
-          />
-          <span className="w-12 text-center text-sm font-bold text-[#9A9187] uppercase">
-            {sel?.unitaMisura || "-"}
-          </span>
-        </div>
+          {/* List */}
+          <div className="max-h-48 overflow-y-auto space-y-1 bg-white rounded-2xl border border-black/5 p-1 relative">
+            {isSearching && (
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span className="text-xs font-bold text-[#9A9187] animate-pulse">Ricerca nel database globale...</span>
+              </div>
+            )}
+            {!isSearching && alimenti.length === 0 && (
+              <p className="text-center text-[#9A9187] text-xs p-4">Nessun alimento trovato.</p>
+            )}
+            {alimenti.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => setSelId(a.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex justify-between items-center ${
+                  selId === a.id ? "bg-[#27C882]/10 text-[#1AA86A]" : "text-[#1C1915] active:bg-[#F8F6F2]"
+                }`}
+              >
+                <div className="flex flex-col">
+                  <span className="truncate max-w-[200px]">{a.nome}</span>
+                  {a.sorgente === "openfoodfacts" && (
+                    <span className="text-[9px] font-bold text-[#F59E0B] uppercase tracking-wider">Database Esterno (100g)</span>
+                  )}
+                </div>
+                <div className="flex flex-col items-end text-right">
+                  <span className="text-[10px] text-[#9A9187] font-bold">{a.nutri.kcal.toFixed(0)} kcal</span>
+                  {a.sorgente === "openfoodfacts" && (
+                    <span className="text-[8px] text-[#C5BFB8] font-bold">C:{a.nutri.carbo.toFixed(1)} P:{a.nutri.proteine.toFixed(1)}</span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
 
-        <button
-          onClick={submit}
-          disabled={!sel || !q}
-          className="w-full py-3.5 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-[0.98] transition-all disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #27C882 0%, #1AA86A 100%)" }}
-        >
-          Conferma Sostituzione
-        </button>
-      </div>
-    </Sheet>
+          {/* Quantity */}
+          <div className="flex items-center gap-3 bg-[#F8F6F2] p-1 rounded-2xl">
+            <input
+              type="number"
+              placeholder={sel?.sorgente === "openfoodfacts" ? "Quantità (g)" : "Quantità"}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="flex-1 bg-white rounded-xl px-4 py-3 text-sm font-bold text-[#1C1915] text-center border-none focus:ring-2 focus:ring-[#27C882]/40"
+            />
+            <span className="w-12 text-center text-sm font-bold text-[#9A9187] uppercase">
+              {sel?.unitaMisura || "-"}
+            </span>
+          </div>
+
+          <button
+            onClick={submit}
+            disabled={!sel || !q}
+            className="w-full py-3.5 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-[0.98] transition-all disabled:opacity-40"
+            style={{ background: "linear-gradient(135deg, #27C882 0%, #1AA86A 100%)" }}
+          >
+            Conferma Sostituzione
+          </button>
+        </div>
+      </Sheet>
+      <BarcodeScannerSheet
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onResult={(alimento, quantita) => {
+          setScannerOpen(false);
+          onSwap({ alimento, quantita });
+          showToast(`Sostituito con ${alimento.nome}`);
+          onClose();
+        }}
+      />
+    </>
   );
 }
-

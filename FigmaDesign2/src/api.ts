@@ -2,7 +2,7 @@ import type { AlimentoDef } from "./data";
 
 export async function fetchProductByBarcode(barcode: string): Promise<AlimentoDef | null> {
   try {
-    const res = await fetch(https://world.openfoodfacts.org/api/v0/product/ + barcode + .json);
+    const res = await fetch("https://world.openfoodfacts.org/api/v0/product/" + barcode + ".json");
     const data = await res.json();
 
     if (data.status !== 1 || !data.product) {
@@ -18,7 +18,7 @@ export async function fetchProductByBarcode(barcode: string): Promise<AlimentoDe
     }
 
     return {
-      id: off_ + p._id,
+      id: "off_" + p._id,
       nome: p.product_name_it || p.product_name || "Prodotto Sconosciuto",
       categoria: "extra",
       unitaMisura: "g", // Open Food Facts e sempre su 100g/100ml

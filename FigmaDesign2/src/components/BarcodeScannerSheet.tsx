@@ -83,7 +83,7 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
     if (product && quantita) {
       const q = parseFloat(quantita);
       if (!isNaN(q) && q > 0) {
-        // Normalizza l'alimento ai grammi effettivi, poiche OFF è per 100g
+        // Normalizza l'alimento ai grammi effettivi, poiche OFF Ã¨ per 100g
         const finalAlimento = {
           ...product,
           nutri: {
@@ -121,7 +121,7 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
         {status === 'error' && (
           <div className="py-20 text-center space-y-4">
             <p className="text-[#EF4444] font-bold text-lg">Prodotto non trovato</p>
-            <p className="text-[#9A9187] text-sm">Il codice a barre non è presente nel database di Open Food Facts.</p>
+            <p className="text-[#9A9187] text-sm">Il codice a barre non Ã¨ presente nel database di Open Food Facts.</p>
             <button
               onClick={() => setStatus('scanning')}
               className="mt-4 px-6 py-2 bg-[#27C882] text-white font-bold rounded-xl"
@@ -167,4 +167,4 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
       </div>
     </Sheet>
   );
-}
+}

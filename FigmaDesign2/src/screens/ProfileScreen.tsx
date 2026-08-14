@@ -559,7 +559,7 @@ function ImpostazioniSheet({ open, onClose }: { open: boolean; onClose: () => vo
         <div>
           <p className="text-[11px] font-bold text-[#9A9187] uppercase tracking-widest mb-2">Azione del tasto + (tocco singolo)</p>
           <div className="flex gap-2">
-            {([{ key: "spesa", label: "🛒 Spesa" }, { key: "pasto", label: "🍽️ Pasto" }] as const).map((o) => (
+            {([{ key: "spesa", label: "🛒 Spesa" }, { key: "pasto", label: "🍽️ Pasto" }, { key: "barcode", label: "📷 Scanner" }] as const).map((o) => (
               <button key={o.key} onClick={() => setImpostazioni({ fabDefault: o.key })}
                 className={`flex-1 px-3 py-3 rounded-2xl text-xs font-bold transition-all active:scale-95 ${impostazioni.fabDefault === o.key ? "bg-[#1C1915] text-white shadow-sm" : "bg-white text-[#9A9187] border border-black/5"}`}>
                 {o.label}
