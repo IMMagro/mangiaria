@@ -36,8 +36,8 @@ export default function SwapAlimentoSheet({ open, onClose, onSwap, titoloLogico 
       return;
     }
 
-    setIsSearching(true);
     const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
       try {
         const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(search)}&search_simple=1&action=process&json=1&page_size=15`);
         const data = await res.json();

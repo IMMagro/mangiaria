@@ -19,10 +19,20 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
   useEffect(() => {
     if (!open) {
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
-          scannerRef.current?.clear();
+        try {
+          if (scannerRef.current.getState() === 2 /* SCANNING */) {
+            scannerRef.current.stop().catch(() => {}).finally(() => {
+              try { scannerRef.current?.clear(); } catch(e) {}
+              scannerRef.current = null;
+            });
+          } else {
+            try { scannerRef.current.clear(); } catch(e) {}
+            scannerRef.current = null;
+          }
+        } catch (err) {
+          try { scannerRef.current?.clear(); } catch(e) {}
           scannerRef.current = null;
-        });
+        }
       }
       setStatus('scanning');
       setProduct(null);
@@ -33,6 +43,7 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
     if (status !== 'scanning') return;
 
     let isMounted = true;
+    let isProcessing = false;
     
     // Slight delay to ensure DOM element is ready for Html5Qrcode
     const timeout = setTimeout(() => {
@@ -45,7 +56,8 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 150 } },
         async (decodedText) => {
-          if (!isMounted) return;
+          if (!isMounted || isProcessing) return;
+          isProcessing = true;
           // Stop scanner
           await html5QrCode.stop().catch(console.error);
           scannerRef.current = null;
@@ -71,10 +83,20 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
       isMounted = false;
       clearTimeout(timeout);
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
-          scannerRef.current?.clear();
+        try {
+          if (scannerRef.current.getState() === 2 /* SCANNING */) {
+            scannerRef.current.stop().catch(() => {}).finally(() => {
+              try { scannerRef.current?.clear(); } catch(e) {}
+              scannerRef.current = null;
+            });
+          } else {
+            try { scannerRef.current.clear(); } catch(e) {}
+            scannerRef.current = null;
+          }
+        } catch (err) {
+          try { scannerRef.current?.clear(); } catch(e) {}
           scannerRef.current = null;
-        });
+        }
       }
     };
   }, [open, status]);
@@ -167,4 +189,5 @@ export default function BarcodeScannerSheet({ open, onClose, onResult }: Props) 
       </div>
     </Sheet>
   );
-}
+}
+
